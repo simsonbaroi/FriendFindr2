@@ -177,6 +177,7 @@ export default function UserProfileScreen() {
   if (!profile) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
         <View style={[styles.notFoundIcon, { backgroundColor: colors.muted }]}>
           <Feather name="user-x" size={32} color={colors.mutedForeground} />
         </View>
@@ -193,7 +194,7 @@ export default function UserProfileScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
@@ -201,15 +202,19 @@ export default function UserProfileScreen() {
       >
         <LinearGradient
           colors={["#071020", "#0D1C38"]}
-          style={[styles.hero, { paddingTop: topPad + 10 }]}
+          style={[styles.hero, { paddingTop: topPad + 12 }]}
         >
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backBtn}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.8)" />
           </TouchableOpacity>
 
           <View style={styles.heroContent}>
             <View style={styles.avatarWrap}>
-              <Avatar uri={profile.photoURL} name={profile.displayName} size={90} />
+              <Avatar uri={profile.photoURL} name={profile.displayName} size={92} />
             </View>
             <Text style={styles.heroName}>{profile.displayName}</Text>
             <Text style={styles.heroUsername}>@{profile.username}</Text>
@@ -301,13 +306,13 @@ const styles = StyleSheet.create({
   backPillText: { color: "#fff", fontSize: 14, fontFamily: "Inter_600SemiBold" },
   hero: {
     paddingHorizontal: 20,
-    paddingBottom: 30,
+    paddingBottom: 32,
   },
   backBtn: {
     padding: 8,
-    marginBottom: 14,
+    marginBottom: 16,
     alignSelf: "flex-start",
-    borderRadius: 10,
+    borderRadius: 12,
     backgroundColor: "rgba(255,255,255,0.1)",
   },
   heroContent: { alignItems: "center", gap: 8 },
@@ -319,7 +324,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   heroName: {
-    fontSize: 23,
+    fontSize: 24,
     fontFamily: "Inter_700Bold",
     color: "#FFFFFF",
     letterSpacing: -0.3,

@@ -67,8 +67,9 @@ export default function EditProfileScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: botPad + 40 }}
       keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
     >
-      <StatusBar barStyle={colors.statusBar} />
+      <StatusBar barStyle={colors.statusBar} translucent backgroundColor="transparent" />
 
       <View
         style={[
@@ -76,11 +77,15 @@ export default function EditProfileScreen() {
           { paddingTop: topPad + 14, borderBottomColor: colors.border, backgroundColor: colors.background },
         ]}
       >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Feather name="arrow-left" size={22} color={colors.foreground} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.foreground }]}>Edit Profile</Text>
-        <View style={{ width: 38 }} />
+        <View style={{ width: 40 }} />
       </View>
 
       <View style={styles.form}>

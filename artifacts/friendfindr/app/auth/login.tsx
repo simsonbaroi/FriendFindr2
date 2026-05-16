@@ -66,11 +66,11 @@ export default function LoginScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       <LinearGradient
         colors={["#071020", "#0D1C38", colors.background]}
-        style={[styles.heroBg, { paddingTop: topPad + 28 }]}
+        style={[styles.heroBg, { paddingTop: topPad + 32 }]}
       >
         <View style={styles.logoWrap}>
           <View style={styles.logoBox}>
@@ -83,10 +83,11 @@ export default function LoginScreen() {
 
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "android" ? 24 : 0}
       >
         <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 32 }]}
+          contentContainerStyle={[styles.scroll, { paddingBottom: Math.max(botPad, 24) + 24 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -121,6 +122,7 @@ export default function LoginScreen() {
               <TouchableOpacity
                 onPress={() => router.push("/auth/forgot-password")}
                 style={styles.forgotRow}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Text style={[styles.forgot, { color: colors.primary }]}>Forgot password?</Text>
               </TouchableOpacity>
@@ -154,31 +156,31 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   heroBg: {
     paddingHorizontal: 24,
-    paddingBottom: 36,
+    paddingBottom: 40,
     alignItems: "center",
-    gap: 6,
+    gap: 8,
   },
-  logoWrap: { marginBottom: 6 },
+  logoWrap: { marginBottom: 8 },
   logoBox: {
-    width: 68,
-    height: 68,
-    borderRadius: 20,
+    width: 72,
+    height: 72,
+    borderRadius: 22,
     backgroundColor: "#00C4D8",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#00C4D8",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.45,
-    shadowRadius: 18,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 12,
   },
   logoLetter: {
-    fontSize: 34,
+    fontSize: 36,
     fontFamily: "Inter_700Bold",
     color: "#FFFFFF",
   },
   heroTitle: {
-    fontSize: 27,
+    fontSize: 28,
     fontFamily: "Inter_700Bold",
     color: "#FFFFFF",
     letterSpacing: -0.5,
@@ -186,28 +188,29 @@ const styles = StyleSheet.create({
   heroSub: {
     fontSize: 14,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.55)",
+    color: "rgba(255,255,255,0.5)",
   },
   scroll: {
     paddingHorizontal: 20,
-    paddingTop: 8,
-    gap: 16,
+    paddingTop: 4,
+    gap: 18,
   },
   card: {
-    borderRadius: 20,
+    borderRadius: 22,
     borderWidth: 1,
     padding: 24,
-    gap: 22,
+    gap: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 3,
   },
-  cardHeader: { gap: 4 },
+  cardHeader: { gap: 5 },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 21,
     fontFamily: "Inter_700Bold",
+    letterSpacing: -0.3,
   },
   cardSub: {
     fontSize: 14,
@@ -227,9 +230,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 4,
+    gap: 6,
   },
   footerText: { fontSize: 14, fontFamily: "Inter_400Regular" },
-  footerLink: { padding: 2 },
+  footerLink: { paddingVertical: 2, paddingHorizontal: 2 },
   link: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });

@@ -26,7 +26,6 @@ export default function SettingsScreen() {
   const botPad = insets.bottom;
 
   const openSupport = () => router.push("/contact-support");
-
   const showPrivacyPolicy = () => router.push("/privacy-policy");
 
   const Row = ({
@@ -35,15 +34,21 @@ export default function SettingsScreen() {
     onPress,
     value,
     danger,
+    last,
   }: {
     icon: keyof typeof Feather.glyphMap;
     label: string;
     onPress: () => void;
     value?: string;
     danger?: boolean;
+    last?: boolean;
   }) => (
     <TouchableOpacity
-      style={[styles.row, { borderBottomColor: colors.border }]}
+      style={[
+        styles.row,
+        { borderBottomColor: colors.border },
+        last && { borderBottomWidth: 0 },
+      ]}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -78,7 +83,7 @@ export default function SettingsScreen() {
       contentContainerStyle={{ paddingBottom: botPad + 40 }}
       showsVerticalScrollIndicator={false}
     >
-      <StatusBar barStyle={colors.statusBar} />
+      <StatusBar barStyle={colors.statusBar} translucent backgroundColor="transparent" />
 
       <View
         style={[
@@ -86,11 +91,15 @@ export default function SettingsScreen() {
           { paddingTop: topPad + 14, borderBottomColor: colors.border },
         ]}
       >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Feather name="arrow-left" size={22} color={colors.foreground} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.foreground }]}>Settings</Text>
-        <View style={{ width: 38 }} />
+        <View style={{ width: 40 }} />
       </View>
 
       <TouchableOpacity
@@ -114,7 +123,7 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>Account</Text>
         <Row icon="edit-2" label="Edit Profile" onPress={() => router.push("/edit-profile")} />
         <Row icon="shield" label="Privacy Settings" onPress={() => router.push("/privacy-settings")} />
-        <Row icon="mail" label="Email" value={profile?.email ?? ""} onPress={() => {}} />
+        <Row icon="mail" label="Email" value={profile?.email ?? ""} onPress={() => {}} last />
       </View>
 
       <View
@@ -124,22 +133,9 @@ export default function SettingsScreen() {
         ]}
       >
         <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>Support & Legal</Text>
-        <Row
-          icon="help-circle"
-          label="Contact Support"
-          onPress={openSupport}
-        />
-        <Row
-          icon="lock"
-          label="Privacy Policy"
-          onPress={showPrivacyPolicy}
-        />
-        <Row
-          icon="info"
-          label="Version"
-          value="v1.0.0"
-          onPress={() => {}}
-        />
+        <Row icon="help-circle" label="Contact Support" onPress={openSupport} />
+        <Row icon="lock" label="Privacy Policy" onPress={showPrivacyPolicy} />
+        <Row icon="info" label="Version" value="v1.0.0" onPress={() => {}} last />
       </View>
 
       <View
@@ -179,6 +175,7 @@ export default function SettingsScreen() {
             ])
           }
           danger
+          last
         />
       </View>
     </ScrollView>
@@ -207,7 +204,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: 12,
   },
-  profileInfo: { flex: 1 },
+  profileInfo: { flex: 1, gap: 2 },
   profileName: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
   profileUsername: { fontSize: 13, fontFamily: "Inter_400Regular" },
   section: {
@@ -243,7 +240,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   rowLabel: { flex: 1, fontSize: 15, fontFamily: "Inter_500Medium" },
-  rowValue: { fontSize: 13, fontFamily: "Inter_400Regular", maxWidth: 180 },
+  rowValue: { fontSize: 13, fontFamily: "Inter_400Regular", maxWidth: 160 },
   supportCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -264,10 +261,10 @@ const styles = StyleSheet.create({
   },
   supportText: { flex: 1, gap: 2 },
   supportLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
-  supportEmail: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  supportEmail: { fontSize: 12, fontFamily: "Inter_400Regular" },
   supportBtn: {
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: 10,
   },
   supportBtnText: { color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" },

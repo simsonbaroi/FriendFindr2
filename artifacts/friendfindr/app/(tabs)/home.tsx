@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
   StatusBar,
 } from "react-native";
 import { router } from "expo-router";
@@ -56,7 +55,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colors.statusBar} />
+      <StatusBar barStyle={colors.statusBar} translucent backgroundColor="transparent" />
 
       <View
         style={[
@@ -78,12 +77,12 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={[styles.settingsBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={() => router.push("/settings")}
+            hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
           >
             <Feather name="settings" size={18} color={colors.mutedForeground} />
           </TouchableOpacity>
         </View>
 
-        {/* Search bar with integrated search button */}
         <View
           style={[
             styles.searchBar,
@@ -108,7 +107,7 @@ export default function HomeScreen() {
           {!!query && (
             <TouchableOpacity
               onPress={handleClear}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               style={styles.clearBtn}
             >
               <Feather name="x" size={16} color={colors.mutedForeground} />
@@ -215,12 +214,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  brand: { fontSize: 21, fontFamily: "Inter_700Bold", letterSpacing: -0.3 },
+  brand: { fontSize: 22, fontFamily: "Inter_700Bold", letterSpacing: -0.3 },
   greeting: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
   settingsBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 13,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -242,8 +241,8 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   clearBtn: {
-    width: 28,
-    height: 28,
+    width: 30,
+    height: 30,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -116,7 +116,7 @@ export default function RequestsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colors.statusBar} />
+      <StatusBar barStyle={colors.statusBar} translucent backgroundColor="transparent" />
 
       <View
         style={[
@@ -133,7 +133,17 @@ export default function RequestsScreen() {
             return (
               <TouchableOpacity
                 key={t}
-                style={[styles.tabBtn, active && { backgroundColor: colors.card, shadowColor: "#000", shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2 }]}
+                style={[
+                  styles.tabBtn,
+                  active && {
+                    backgroundColor: colors.card,
+                    shadowColor: "#000",
+                    shadowOpacity: 0.08,
+                    shadowRadius: 4,
+                    shadowOffset: { width: 0, height: 1 },
+                    elevation: 2,
+                  },
+                ]}
                 onPress={() => setTab(t)}
                 activeOpacity={0.75}
               >
@@ -149,7 +159,12 @@ export default function RequestsScreen() {
                   {t === "incoming" ? "Incoming" : "Sent"}
                 </Text>
                 {count > 0 && (
-                  <View style={[styles.badge, { backgroundColor: active ? colors.primary : colors.mutedForeground + "90" }]}>
+                  <View
+                    style={[
+                      styles.badge,
+                      { backgroundColor: active ? colors.primary : colors.mutedForeground + "90" },
+                    ]}
+                  >
                     <Text style={styles.badgeText}>{count}</Text>
                   </View>
                 )}
@@ -261,12 +276,17 @@ const RequestCard = React.memo(function RequestCard({
           <TouchableOpacity
             style={[styles.approveBtn, { backgroundColor: colors.primary }]}
             onPress={() => onApprove(item.request)}
+            hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
           >
             <Feather name="check" size={18} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.rejectBtn, { backgroundColor: colors.destructive + "14", borderColor: colors.destructive + "30", borderWidth: 1 }]}
+            style={[
+              styles.rejectBtn,
+              { backgroundColor: colors.destructive + "14", borderColor: colors.destructive + "30", borderWidth: 1 },
+            ]}
             onPress={() => onReject(item.request)}
+            hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
           >
             <Feather name="x" size={18} color={colors.destructive} />
           </TouchableOpacity>
@@ -339,22 +359,22 @@ const styles = StyleSheet.create({
   cardProf: { fontSize: 12, fontFamily: "Inter_400Regular" },
   actions: { flexDirection: "row", gap: 8 },
   approveBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: "center",
     justifyContent: "center",
   },
   rejectBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: "center",
     justifyContent: "center",
   },
   cancelPill: {
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: 20,
     borderWidth: 1,
   },

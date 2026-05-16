@@ -80,15 +80,15 @@ export default function ProfileScreen() {
       contentContainerStyle={{ paddingBottom: botPad + 100 }}
       showsVerticalScrollIndicator={false}
     >
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       <LinearGradient
         colors={["#071020", "#0D1C38"]}
-        style={[styles.heroBg, { paddingTop: topPad + 18 }]}
+        style={[styles.heroBg, { paddingTop: topPad + 20 }]}
       >
         <View style={styles.heroInner}>
           <View style={styles.avatarWrap}>
-            <Avatar uri={profile.photoURL} name={profile.displayName} size={82} />
+            <Avatar uri={profile.photoURL} name={profile.displayName} size={84} />
           </View>
           <View style={styles.heroText}>
             <Text style={styles.heroName}>{profile.displayName}</Text>
@@ -103,6 +103,7 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={[styles.editBtn, { borderColor: "rgba(255,255,255,0.2)" }]}
             onPress={() => router.push("/edit-profile")}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Feather name="edit-2" size={15} color="rgba(255,255,255,0.85)" />
           </TouchableOpacity>
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   heroBg: {
     paddingHorizontal: 20,
-    paddingBottom: 22,
+    paddingBottom: 24,
     gap: 14,
   },
   heroInner: { flexDirection: "row", alignItems: "flex-start", gap: 14 },
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 8,
   },
-  heroText: { flex: 1, gap: 4 },
+  heroText: { flex: 1, gap: 4, paddingTop: 2 },
   heroName: {
     fontSize: 20,
     fontFamily: "Inter_700Bold",
@@ -192,9 +193,9 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.65)",
   },
   editBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
   tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tag: {
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 20,
     backgroundColor: "rgba(255,255,255,0.1)",
     borderWidth: 1,

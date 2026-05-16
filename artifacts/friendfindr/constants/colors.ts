@@ -31,7 +31,7 @@ const colors = {
     warning: "#F59E0B",
 
     navBar: "#FFFFFF",
-    statusBar: "dark" as const,
+    statusBar: "dark-content" as const,
   },
 
   dark: {
@@ -66,7 +66,7 @@ const colors = {
     warning: "#FBBF24",
 
     navBar: "#111827",
-    statusBar: "light" as const,
+    statusBar: "light-content" as const,
   },
 
   radius: 14,

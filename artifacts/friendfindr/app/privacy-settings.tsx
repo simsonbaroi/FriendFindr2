@@ -73,18 +73,26 @@ export default function PrivacySettingsScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: botPad + 40 }}
+      showsVerticalScrollIndicator={false}
     >
-      <StatusBar barStyle={colors.statusBar} />
+      <StatusBar barStyle={colors.statusBar} translucent backgroundColor="transparent" />
+
       <View style={[styles.header, { paddingTop: topPad + 14, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Feather name="arrow-left" size={22} color={colors.foreground} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.foreground }]}>Privacy Settings</Text>
-        <View style={{ width: 38 }} />
+        <View style={{ width: 40 }} />
       </View>
 
       <View style={[styles.shield, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "20" }]}>
-        <Feather name="shield" size={24} color={colors.primary} />
+        <View style={[styles.shieldIconBox, { backgroundColor: colors.primary + "18" }]}>
+          <Feather name="shield" size={20} color={colors.primary} />
+        </View>
         <View style={styles.shieldText}>
           <Text style={[styles.shieldTitle, { color: colors.foreground }]}>Always protected</Text>
           <Text style={[styles.shieldSub, { color: colors.mutedForeground }]}>
@@ -136,18 +144,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingBottom: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  backBtn: { padding: 4 },
+  backBtn: { padding: 6, borderRadius: 10 },
   title: { fontSize: 18, fontFamily: "Inter_700Bold" },
   shield: {
     margin: 16,
     padding: 16,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     flexDirection: "row",
     gap: 12,
     alignItems: "flex-start",
+  },
+  shieldIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   shieldText: { flex: 1, gap: 4 },
   shieldTitle: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
@@ -160,18 +175,18 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Inter_600SemiBold",
-    letterSpacing: 0.5,
+    letterSpacing: 0.7,
     textTransform: "uppercase",
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
     padding: 14,
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     gap: 12,
   },
   toggleIcon: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center" },

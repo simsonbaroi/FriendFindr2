@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
   StatusBar,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
@@ -118,7 +117,7 @@ export default function ChatScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colors.statusBar} />
+      <StatusBar barStyle={colors.statusBar} translucent backgroundColor="transparent" />
 
       <View
         style={[
@@ -133,7 +132,7 @@ export default function ChatScreen() {
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backBtn}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Feather name="arrow-left" size={22} color={colors.foreground} />
         </TouchableOpacity>
@@ -199,14 +198,14 @@ export default function ChatScreen() {
             {
               backgroundColor: colors.card,
               borderTopColor: colors.border,
-              paddingBottom: Math.max(botPad, 10) + 4,
+              paddingBottom: Math.max(botPad, 12) + 4,
             },
           ]}
         >
           <View
             style={[
               styles.inputBox,
-              { backgroundColor: colors.background, borderColor: colors.border },
+              { backgroundColor: colors.background, borderColor: text ? colors.primary : colors.border },
             ]}
           >
             <TextInput
@@ -223,9 +222,7 @@ export default function ChatScreen() {
           <TouchableOpacity
             style={[
               styles.sendBtn,
-              {
-                backgroundColor: text.trim() ? colors.primary : colors.muted,
-              },
+              { backgroundColor: text.trim() ? colors.primary : colors.muted },
             ]}
             onPress={handleSend}
             disabled={!text.trim() || sending}

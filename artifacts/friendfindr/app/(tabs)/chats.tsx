@@ -77,7 +77,7 @@ export default function ChatsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle={colors.statusBar} />
+      <StatusBar barStyle={colors.statusBar} translucent backgroundColor="transparent" />
 
       <View
         style={[
@@ -148,8 +148,6 @@ const ChatRow = React.memo(function ChatRow({
   colors: any;
   onPress: () => void;
 }) {
-  const hasUnread = false;
-
   return (
     <TouchableOpacity
       style={[styles.chatRow, { backgroundColor: colors.card, borderColor: colors.border }]}

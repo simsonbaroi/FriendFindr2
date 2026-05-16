@@ -74,14 +74,18 @@ export default function SignupScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
       <LinearGradient
         colors={["#071020", "#0D1C38", colors.background]}
-        style={[styles.heroBg, { paddingTop: topPad + 18 }]}
+        style={[styles.heroBg, { paddingTop: topPad + 16 }]}
       >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.75)" />
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.8)" />
         </TouchableOpacity>
         <Text style={styles.heroTitle}>Create account</Text>
         <Text style={styles.heroSub}>Join FriendFindr today</Text>
@@ -89,10 +93,11 @@ export default function SignupScreen() {
 
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "android" ? 24 : 0}
       >
         <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 32 }]}
+          contentContainerStyle={[styles.scroll, { paddingBottom: Math.max(botPad, 24) + 24 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -165,17 +170,17 @@ const styles = StyleSheet.create({
   heroBg: {
     paddingHorizontal: 20,
     paddingBottom: 28,
-    gap: 4,
+    gap: 6,
   },
   backBtn: {
-    marginBottom: 14,
-    padding: 6,
+    marginBottom: 16,
+    padding: 8,
     alignSelf: "flex-start",
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
   heroTitle: {
-    fontSize: 27,
+    fontSize: 28,
     fontFamily: "Inter_700Bold",
     color: "#FFFFFF",
     letterSpacing: -0.5,
@@ -183,19 +188,19 @@ const styles = StyleSheet.create({
   heroSub: {
     fontSize: 14,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.55)",
+    color: "rgba(255,255,255,0.5)",
   },
-  scroll: { paddingHorizontal: 20, paddingTop: 8, gap: 16 },
+  scroll: { paddingHorizontal: 20, paddingTop: 4, gap: 18 },
   card: {
-    borderRadius: 20,
+    borderRadius: 22,
     borderWidth: 1,
     padding: 24,
-    gap: 22,
+    gap: 24,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 3,
   },
   fields: { gap: 14 },
   privacyRow: {
@@ -209,9 +214,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 4,
+    gap: 6,
   },
   footerText: { fontSize: 14, fontFamily: "Inter_400Regular" },
-  footerLink: { padding: 2 },
+  footerLink: { paddingVertical: 2, paddingHorizontal: 2 },
   link: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });
