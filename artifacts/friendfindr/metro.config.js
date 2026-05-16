@@ -13,10 +13,11 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, "node_modules"),
 ];
 
-// Exclude Firebase database temp dirs that cause ENOENT watcher crashes
+// Exclude temp dirs that cause ENOENT watcher crashes
 config.resolver.blockList = [
   /.*@firebase\+database.*_tmp_\d+.*/,
   /.*firebase[/\\]database.*_tmp_\d+.*/,
+  /.*node_modules[/\\]\.vite[/\\].*/,
 ];
 
 module.exports = config;
