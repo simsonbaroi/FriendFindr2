@@ -1,19 +1,39 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import {
+  initializeAuth,
+  getReactNativePersistence,
+  getAuth,
+} from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getFirestore } from "firebase/firestore";
 
+// Firebase configuration
 const firebaseConfig = {
-  projectId: "friendfindr-shimshon",
-  appId: "1:463784884633:web:5b1980237241b24dfebb08",
-  apiKey: process.env.FIREBASE_API_KEY || "",
-  authDomain: "friendfindr-shimshon.firebaseapp.com",
-  storageBucket: "friendfindr-shimshon.firebasestorage.app",
-  messagingSenderId: "463784884633",
-  measurementId: "",
+  ,
+  authDomapiKey: "AIzaSyB3NUuMrEg9UsgaATbjsLFpBrn5pC5mPfA"ain: "friendfindr2.firebaseapp.com",
+  projectId: "friendfindr2",
+  storageBucket: "friendfindr2.firebasestorage.app",
+  messagingSenderId: "997095104599",
+  appId: "1:997095104599:web:d016b6e4712c8368bcc312",
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Prevent re-initialization during hot reload
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
+// Initialize Auth with persistence for React Native
+let auth;
+
+try {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+} catch (error) {
+  // Fallback if auth already initialized
+  auth = getAuth(app);
+}
+
+// Firestore
+const db = getFirestore(app);
+
+export { app, auth, db };
 export default app;
