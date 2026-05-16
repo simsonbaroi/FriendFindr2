@@ -1,0 +1,8 @@
+{
+  "name": "FriendFindr",
+  "description": "FriendFindr: A platform for finding and connecting with friends, featuring real-time chat and profile discovery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

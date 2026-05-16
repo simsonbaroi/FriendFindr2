@@ -1,0 +1,293 @@
+You are an expert Flutter + Firebase full-stack mobile app developer.
+
+I want you to build the MVP foundation of a mobile application called "FriendFindr".
+
+APP CONCEPT:
+FriendFindr is a privacy-focused social discovery and reconnect app where users can search for people and safely reconnect without publicly exposing personal contact information like phone numbers or emails.
+
+The core principle of the app is:
+"Find people again while keeping control over your private contact information."
+
+TECH STACK:
+
+* Flutter frontend
+* Firebase backend
+* Firestore database
+* Firebase Authentication
+* Firebase Storage
+* Firebase Cloud Messaging
+* Material 3 UI
+* Dark/light mode support
+* Clean scalable architecture
+
+IMPORTANT:
+This is an MVP version.
+DO NOT build unnecessary advanced features yet.
+DO NOT add ads.
+DO NOT add video calling.
+DO NOT add audio calling.
+DO NOT add social feeds.
+DO NOT add AI features yet.
+Focus ONLY on clean scalable architecture and the core reconnect system.
+
+==================================================
+APP FEATURES (MVP ONLY)
+=======================
+
+1. AUTHENTICATION
+
+* Email/password signup
+* Login
+* Forgot password
+* Persistent login
+* Logout
+
+2. USER PROFILE
+   Each user should have:
+
+* Display name
+* Username (unique)
+* Profile photo
+* Bio
+* Country
+* Profession or tags
+* Search visibility toggle
+* Privacy settings
+
+3. SEARCH SYSTEM
+   Users can search by:
+
+* Name
+* Username
+* Profession
+* Tags
+
+Search results should ONLY show:
+
+* Profile photo
+* Name
+* Username
+* Bio preview
+
+NEVER expose:
+
+* Email
+* Phone number
+* Private data
+
+4. CONTACT REQUEST SYSTEM
+   Users should be able to:
+
+* Send request
+* Cancel request
+* Approve request
+* Reject request
+
+Once approved:
+
+* Chat becomes available
+
+5. REALTIME CHAT
+   Build:
+
+* Text messaging only
+* Realtime Firestore updates
+* Chat list
+* Last message preview
+* Timestamp
+* Read status basic structure
+
+NO:
+
+* voice notes
+* calls
+* media sharing yet
+
+6. PRIVACY FEATURES
+   Users can:
+
+* Hide profile from search
+* Block users
+* Control visibility
+
+7. NOTIFICATIONS
+   Use Firebase Cloud Messaging for:
+
+* New request
+* Request approved
+* New message
+
+==================================================
+DESIGN STYLE
+============
+
+The app should feel:
+
+* modern
+* clean
+* privacy-focused
+* trustworthy
+* minimal
+
+Use:
+
+* Material 3
+* smooth rounded cards
+* soft shadows
+* modern typography
+* minimal clutter
+
+Suggested color palette:
+
+* Deep blue
+* White
+* Charcoal dark mode
+* Soft cyan accents
+
+The design should feel closer to:
+
+* Telegram
+* LinkedIn
+* modern fintech apps
+
+NOT:
+
+* flashy social media apps
+
+==================================================
+APP SCREENS
+===========
+
+Create the following screens:
+
+AUTH:
+
+* Splash screen
+* Login screen
+* Signup screen
+* Forgot password screen
+
+MAIN:
+
+* Home/Search screen
+* Search results screen
+* User profile screen
+* Edit profile screen
+* Requests screen
+* Chat list screen
+* Chat screen
+* Settings screen
+* Privacy settings screen
+
+==================================================
+NAVIGATION
+==========
+
+Bottom navigation:
+
+* Home
+* Search
+* Requests
+* Chats
+* Profile
+
+==================================================
+FIREBASE DATABASE STRUCTURE
+===========================
+
+Create Firestore collections:
+
+users
+requests
+chats
+messages
+blocked_users
+
+Use scalable document structures.
+
+==================================================
+SECURITY RULES
+==============
+
+Implement proper Firebase security logic:
+
+* Users can edit only their own profile
+* Only approved users can chat
+* Blocked users denied access
+* Hidden profiles excluded from search
+
+==================================================
+PROJECT ARCHITECTURE
+====================
+
+Use clean scalable Flutter architecture.
+
+Suggested structure:
+
+lib/
+core/
+models/
+services/
+providers/
+screens/
+widgets/
+utils/
+
+Use:
+
+* Provider or Riverpod for state management
+* Reusable widgets
+* Modular services
+* Clean naming conventions
+
+==================================================
+IMPORTANT DEVELOPMENT INSTRUCTIONS
+==================================
+
+1. Generate production-quality clean code.
+
+2. Keep code modular and beginner understandable.
+
+3. Add comments explaining important sections.
+
+4. Create reusable widgets wherever possible.
+
+5. Use responsive layouts for different screen sizes.
+
+6. Handle loading states and error states properly.
+
+7. Use Firebase best practices.
+
+8. Make the app easy to expand later.
+
+9. Create realistic mock/sample data for testing.
+
+10. Prioritize stability and simplicity over fancy features.
+
+==================================================
+INITIAL DEVELOPMENT TASK
+========================
+
+Start by:
+
+1. Setting up Flutter project structure
+2. Connecting Firebase
+3. Creating authentication flow
+4. Creating reusable theme system
+5. Creating navigation structure
+6. Creating user profile model
+7. Creating Firestore services
+8. Building login/signup screens
+9. Building home/search skeleton
+10. Preparing scalable backend structure
+
+After completing each major section:
+
+* explain what was built
+* explain folder structure
+* explain how to run the app
+* explain Firebase setup steps clearly
+
+DO NOT skip explanations because I am not an experienced developer.
+
+Guide me step-by-step while building.

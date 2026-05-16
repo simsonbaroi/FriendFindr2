@@ -1,0 +1,181 @@
+rules_version = '2';
+
+// FriendFindr — Firestore Security Rules
+//
+// HOW TO APPLY:
+//   1. Go to https://console.firebase.google.com
+//   2. Open your project → Firestore Database → Rules tab
+//   3. Replace the existing rules with everything below
+//   4. Click "Publish"
+//
+// Collections: users | requests | chats | messages
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper functions ─────────────────────────────────────────────────────
+
+    // Is the caller signed in?
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // Is the caller the given user?
+    function isMe(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+
+    // Does an approved request exist between two users (in either direction)?
+    function areConnected(uid1, uid2) {
+      let fwdId = uid1 + '_' + uid2;
+      let revId = uid2 + '_' + uid1;
+      return (
+        exists(/databases/$(database)/documents/requests/$(fwdId)) &&
+        get(/databases/$(database)/documents/requests/$(fwdId)).data.status == 'approved'
+      ) || (
+        exists(/databases/$(database)/documents/requests/$(revId)) &&
+        get(/databases/$(database)/documents/requests/$(revId)).data.status == 'approved'
+      );
+    }
+
+    // ─── /users/{uid} ─────────────────────────────────────────────────────────
+    //
+    // READ:
+    //   • A user can always read their own profile.
+    //   • Anyone signed in can read a profile that has searchVisible == true.
+    //   • Connected users can read each other's profile even if hidden.
+    //
+    // WRITE:
+    //   • Only the owner can write their own profile.
+    //   • A user cannot grant themselves an admin role or change their own uid.
+    //   • Email is set at signup and cannot be changed via this rule set.
+
+    match /users/{uid} {
+      allow read: if isAuth() && (
+        isMe(uid) ||
+        resource.data.searchVisible == true ||
+        areConnected(request.auth.uid, uid)
+      );
+
+      allow create: if isMe(uid) &&
+        request.resource.data.uid == uid &&
+        request.resource.data.keys().hasAll([
+          'uid', 'displayName', 'username', 'email',
+          'searchVisible', 'allowRequests'
+        ]);
+
+      allow update: if isMe(uid) &&
+        // uid must stay the same
+        request.resource.data.uid == uid &&
+        // email must stay the same (change through Firebase Auth instead)
+        request.resource.data.email == resource.data.email;
+
+      allow delete: if false; // accounts are not deleted through the client
+    }
+
+    // ─── /requests/{requestId} ────────────────────────────────────────────────
+    //
+    // Document ID format: {fromUid}_{toUid}
+    //
+    // READ:   either participant can read the request.
+    // CREATE: authenticated user can send a request IF:
+    //           - they are the fromUid in the document ID
+    //           - the target user has allowRequests == true
+    //           - they are not trying to request themselves
+    // UPDATE: only the recipient (toUid) can update status (approve/reject).
+    //         Status can only move from 'pending' → 'approved' or 'rejected'.
+    // DELETE: only the sender (fromUid) can delete (cancel) a pending request.
+
+    match /requests/{requestId} {
+      // Parse participant UIDs from the document ID
+      function fromUid() { return requestId.split('_')[0]; }
+      function toUid()   { return requestId.split('_')[1]; }
+
+      allow read: if isAuth() && (
+        request.auth.uid == fromUid() ||
+        request.auth.uid == toUid()
+      );
+
+      allow create: if isAuth() &&
+        request.auth.uid == fromUid() &&
+        request.auth.uid != toUid() &&
+        request.resource.data.fromUid == fromUid() &&
+        request.resource.data.toUid   == toUid() &&
+        request.resource.data.status  == 'pending' &&
+        get(/databases/$(database)/documents/users/$(toUid())).data.allowRequests == true;
+
+      allow update: if isAuth() &&
+        request.auth.uid == toUid() &&
+        resource.data.status == 'pending' &&
+        request.resource.data.status in ['approved', 'rejected'] &&
+        // toUid and fromUid cannot be changed
+        request.resource.data.fromUid == resource.data.fromUid &&
+        request.resource.data.toUid   == resource.data.toUid;
+
+      allow delete: if isAuth() &&
+        request.auth.uid == fromUid() &&
+        resource.data.status == 'pending';
+    }
+
+    // ─── /chats/{chatId} ──────────────────────────────────────────────────────
+    //
+    // Chat IDs are sorted: smaller UID first, joined by '_'.
+    //
+    // READ/UPDATE: only the two participants.
+    // CREATE:      only via a server-side write (approveRequest creates the chat).
+    //              We allow it from the client too so approveRequest() works,
+    //              but we enforce that the caller must be one of the participants
+    //              and that an approved request between them exists.
+    // DELETE:      not allowed from the client.
+
+    match /chats/{chatId} {
+      function isParticipant() {
+        return isAuth() && request.auth.uid in resource.data.participants;
+      }
+
+      allow read: if isParticipant();
+
+      allow create: if isAuth() &&
+        request.auth.uid in request.resource.data.participants &&
+        request.resource.data.participants.size() == 2 &&
+        areConnected(
+          request.resource.data.participants[0],
+          request.resource.data.participants[1]
+        );
+
+      allow update: if isParticipant() &&
+        // participants list is immutable after creation
+        request.resource.data.participants == resource.data.participants;
+
+      allow delete: if false;
+    }
+
+    // ─── /messages/{messageId} ────────────────────────────────────────────────
+    //
+    // READ:   any participant of the referenced chat.
+    // CREATE: only the sender, and only if they are a participant in the chat.
+    // UPDATE/DELETE: not allowed (messages are immutable once sent).
+
+    match /messages/{messageId} {
+      function chatParticipants() {
+        return get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.participants;
+      }
+      function newChatParticipants() {
+        return get(/databases/$(database)/documents/chats/$(request.resource.data.chatId)).data.participants;
+      }
+
+      allow read: if isAuth() && request.auth.uid in chatParticipants();
+
+      allow create: if isAuth() &&
+        request.auth.uid == request.resource.data.senderId &&
+        request.auth.uid in newChatParticipants() &&
+        request.resource.data.text is string &&
+        request.resource.data.text.size() > 0 &&
+        request.resource.data.text.size() <= 2000;
+
+      allow update: if false;
+      allow delete: if false;
+    }
+
+  }
+}

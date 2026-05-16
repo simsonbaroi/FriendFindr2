@@ -1,0 +1,185 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── HELPER FUNCTIONS ──────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isMe(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(uidField) {
+      return isSignedIn() && request.auth.uid == (existing().get(uidField, null) || incoming().get(uidField, null));
+    }
+
+    // RELATIONAL CHECK: Are two users connected or have a pending request?
+    function areRelated(uid1, uid2) {
+      let fwdId = uid1 + '_' + uid2;
+      let revId = uid2 + '_' + uid1;
+      return exists(/databases/$(database)/documents/requests/$(fwdId)) || 
+             exists(/databases/$(database)/documents/requests/$(revId));
+    }
+
+    function areConnected(uid1, uid2) {
+      let fwdId = uid1 + '_' + uid2;
+      let revId = uid2 + '_' + uid1;
+      return (
+        exists(/databases/$(database)/documents/requests/$(fwdId)) &&
+        get(/databases/$(database)/documents/requests/$(fwdId)).data.status == 'approved'
+      ) || (
+        exists(/databases/$(database)/documents/requests/$(revId)) &&
+        get(/databases/$(database)/documents/requests/$(revId)).data.status == 'approved'
+      );
+    }
+
+    // ─── VALIDATION HELPERS ────────────────────────────────────────────────
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'username', 'email', 'searchVisible', 'allowRequests']) &&
+             data.uid is string && data.uid.size() <= 128 &&
+             data.displayName is string && data.displayName.size() <= 64 &&
+             data.username is string && data.username.size() <= 32 &&
+             data.email is string && data.email.size() <= 128 &&
+             data.searchVisible is bool &&
+             data.allowRequests is bool &&
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 512)) &&
+             (!('profession' in data) || (data.profession is string && data.profession.size() <= 64)) &&
+             (!('bio' in data) || (data.bio is string && data.bio.size() <= 1000)) &&
+             (!('country' in data) || (data.country is string && data.country.size() <= 64)) &&
+             (!('tags' in data) || (data.tags is list && data.tags.size() <= 10)) &&
+             (!('blockedUsers' in data) || (data.blockedUsers is list && data.blockedUsers.size() <= 100));
+    }
+
+    function isValidRequest(data) {
+      return data.keys().hasAll(['fromUid', 'toUid', 'status']) &&
+             data.fromUid is string && data.fromUid.size() <= 128 &&
+             data.toUid is string && data.toUid.size() <= 128 &&
+             data.status in ['pending', 'approved', 'rejected'] &&
+             (!('id' in data) || (data.id is string && data.id.size() <= 256));
+    }
+
+    function isValidChat(data) {
+      return data.keys().hasAll(['participants']) &&
+             data.participants is list && data.participants.size() == 2 &&
+             data.participants[0] is string && data.participants[1] is string;
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['chatId', 'senderId', 'text', 'createdAt']) &&
+             data.chatId is string && data.chatId.size() <= 256 &&
+             data.senderId is string && data.senderId.size() <= 128 &&
+             data.text is string && data.text.size() <= 1000 &&
+             data.createdAt == request.time;
+    }
+
+    // ─── DEFAULT DENY ──────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ─── USERS ─────────────────────────────────────────────────────────────
+    match /users/{uid} {
+      allow get: if isSignedIn() && (
+        isMe(uid) || 
+        (resource != null && existing().get('searchVisible', false) == true) ||
+        areRelated(request.auth.uid, uid)
+      );
+      
+      allow list: if isSignedIn() && (
+        resource.data.get('searchVisible', false) == true ||
+        request.auth.uid == resource.data.uid
+      );
+
+      allow create: if isMe(uid) && isValidUser(incoming());
+      
+      allow update: if isMe(uid) && isValidUser(incoming()) && (
+        // Prevent changing immutable fields
+        incoming().uid == existing().uid &&
+        incoming().email == existing().email
+      );
+    }
+
+    // ─── REQUESTS ──────────────────────────────────────────────────────────
+    match /requests/{requestId} {
+      allow get: if isSignedIn() && (
+        request.auth.uid == existing().fromUid ||
+        request.auth.uid == existing().toUid
+      );
+      
+      allow list: if isSignedIn() && (
+        resource.data.fromUid == request.auth.uid ||
+        resource.data.toUid == request.auth.uid
+      );
+
+      allow create: if isSignedIn() && 
+        isValidId(requestId) &&
+        incoming().fromUid == request.auth.uid &&
+        incoming().toUid != request.auth.uid &&
+        isValidRequest(incoming()) &&
+        get(/databases/$(database)/documents/users/$(incoming().toUid)).data.allowRequests == true;
+
+      allow update: if isSignedIn() && (
+        // Receiver can approve/reject
+        (request.auth.uid == existing().toUid && 
+         existing().status == 'pending' && 
+         incoming().status in ['approved', 'rejected'] &&
+         incoming().fromUid == existing().fromUid &&
+         incoming().toUid == existing().toUid)
+      );
+
+      allow delete: if isSignedIn() && (
+        // Sender can cancel while pending
+        (request.auth.uid == existing().fromUid && existing().status == 'pending')
+      );
+    }
+
+    // ─── CHATS ─────────────────────────────────────────────────────────────
+    match /chats/{chatId} {
+      allow get: if isSignedIn() && request.auth.uid in existing().participants;
+      
+      allow list: if isSignedIn() && request.auth.uid in resource.data.participants;
+
+      allow create: if isSignedIn() && 
+        request.auth.uid in incoming().participants &&
+        isValidChat(incoming()) &&
+        areConnected(incoming().participants[0], incoming().participants[1]);
+
+      allow update: if isSignedIn() && 
+        request.auth.uid in existing().participants &&
+        incoming().participants == existing().participants; // Only lastMessage usually updates
+    }
+
+    // ─── MESSAGES ──────────────────────────────────────────────────────────
+    match /messages/{messageId} {
+      function chatParticipants(cId) {
+        return get(/databases/$(database)/documents/chats/$(cId)).data.participants;
+      }
+
+      allow get: if isSignedIn() && request.auth.uid in chatParticipants(existing().chatId);
+      
+      allow list: if isSignedIn() && request.auth.uid in chatParticipants(resource.data.chatId);
+
+      allow create: if isSignedIn() && 
+        incoming().senderId == request.auth.uid &&
+        request.auth.uid in chatParticipants(incoming().chatId) &&
+        isValidMessage(incoming());
+    }
+  }
+}

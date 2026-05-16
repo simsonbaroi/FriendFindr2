@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "FriendFindr"
+version = "1.0.0"
+id = "artifacts/friendfindr"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 18544
+
+[services.development]
+run = "pnpm --filter @workspace/friendfindr run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/friendfindr", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/friendfindr", "run", "serve" ]
+
+[services.env]
+PORT = "18544"
+BASE_PATH = "/"

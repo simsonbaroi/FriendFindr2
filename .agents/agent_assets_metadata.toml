@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "3gbpC4TZKTSiRS00HuTYM"
+uri = "file://artifacts/friendfindr/assets/images/icon.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "t-fdhhuRlGh0nGYgSGY_O"
+uri = "file://artifacts/friendfindr/assets/images/splash.png"
+type = "image"
+title = "generated_image"
