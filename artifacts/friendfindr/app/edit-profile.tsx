@@ -6,7 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Platform,
+  StatusBar,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -29,8 +29,8 @@ export default function EditProfileScreen() {
   const [tagsText, setTagsText] = useState((profile?.tags ?? []).join(", "));
   const [loading, setLoading] = useState(false);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const botPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const topPad = insets.top;
+  const botPad = insets.bottom;
 
   const handleSave = async () => {
     if (!profile) return;
@@ -68,7 +68,14 @@ export default function EditProfileScreen() {
       contentContainerStyle={{ paddingBottom: botPad + 40 }}
       keyboardShouldPersistTaps="handled"
     >
-      <View style={[styles.header, { paddingTop: topPad + 16, borderBottomColor: colors.border }]}>
+      <StatusBar barStyle={colors.statusBar} />
+
+      <View
+        style={[
+          styles.header,
+          { paddingTop: topPad + 14, borderBottomColor: colors.border, backgroundColor: colors.background },
+        ]}
+      >
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={colors.foreground} />
         </TouchableOpacity>
@@ -108,11 +115,11 @@ export default function EditProfileScreen() {
           placeholder="e.g. Software Engineer"
         />
         <InputField
-          label="Interests / Tags (comma-separated)"
+          label="Interests / Tags"
           value={tagsText}
           onChangeText={setTagsText}
           leftIcon="tag"
-          placeholder="e.g. design, travel, music"
+          placeholder="e.g. design, travel, music (comma-separated)"
         />
         <PrimaryButton label="Save Changes" onPress={handleSave} loading={loading} />
       </View>
@@ -127,10 +134,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
+    paddingBottom: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  backBtn: { padding: 4 },
+  backBtn: { padding: 6, borderRadius: 10 },
   title: { fontSize: 18, fontFamily: "Inter_700Bold" },
   form: { padding: 20, gap: 16 },
 });

@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
-  Platform,
   StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -43,7 +42,7 @@ export default function UserProfileScreen() {
   const [reqDirection, setReqDirection] = useState<"sent" | "received" | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = insets.top;
 
   const load = async () => {
     if (!uid || !currentUser) return;
@@ -110,9 +109,9 @@ export default function UserProfileScreen() {
       return (
         <View style={styles.actionArea}>
           <PrimaryButton label="Open Chat" onPress={handleOpenChat} />
-          <View style={[styles.connectedBadge, { backgroundColor: colors.success + "15", borderColor: colors.success + "30" }]}>
-            <Feather name="check-circle" size={15} color={colors.success} />
-            <Text style={[styles.connectedText, { color: colors.success }]}>You're connected</Text>
+          <View style={[styles.statusBadge, { backgroundColor: colors.success + "14", borderColor: colors.success + "28" }]}>
+            <Feather name="check-circle" size={14} color={colors.success} />
+            <Text style={[styles.statusText, { color: colors.success }]}>You're connected</Text>
           </View>
         </View>
       );
@@ -121,9 +120,9 @@ export default function UserProfileScreen() {
     if (reqStatus === "pending" && reqDirection === "sent") {
       return (
         <View style={styles.actionArea}>
-          <View style={[styles.pendingBadge, { backgroundColor: colors.warning + "15", borderColor: colors.warning + "30" }]}>
-            <Feather name="clock" size={15} color={colors.warning} />
-            <Text style={[styles.pendingText, { color: colors.warning }]}>Request sent — awaiting response</Text>
+          <View style={[styles.statusBadge, { backgroundColor: colors.warning + "14", borderColor: colors.warning + "28" }]}>
+            <Feather name="clock" size={14} color={colors.warning} />
+            <Text style={[styles.statusText, { color: colors.warning }]}>Request sent — awaiting response</Text>
           </View>
           <PrimaryButton label="Cancel Request" onPress={handleCancel} loading={actionLoading} variant="ghost" />
         </View>
@@ -133,9 +132,11 @@ export default function UserProfileScreen() {
     if (reqStatus === "pending" && reqDirection === "received") {
       return (
         <View style={styles.actionArea}>
-          <View style={[styles.pendingBadge, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "30" }]}>
-            <Feather name="user-plus" size={15} color={colors.primary} />
-            <Text style={[styles.pendingText, { color: colors.primary }]}>This person wants to connect with you</Text>
+          <View style={[styles.statusBadge, { backgroundColor: colors.primary + "14", borderColor: colors.primary + "28" }]}>
+            <Feather name="user-plus" size={14} color={colors.primary} />
+            <Text style={[styles.statusText, { color: colors.primary }]}>
+              This person wants to connect with you
+            </Text>
           </View>
           <PrimaryButton label="Accept Request" onPress={handleApprove} loading={actionLoading} />
           <PrimaryButton
@@ -159,7 +160,7 @@ export default function UserProfileScreen() {
           loading={actionLoading}
         />
         <Text style={[styles.actionNote, { color: colors.mutedForeground }]}>
-          A request will be sent privately — they won't see your contact info
+          A request is sent privately — they won't see your contact info
         </Text>
       </View>
     );
@@ -176,10 +177,15 @@ export default function UserProfileScreen() {
   if (!profile) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
-        <Feather name="user-x" size={40} color={colors.mutedForeground} />
-        <Text style={[styles.notFound, { color: colors.mutedForeground }]}>User not found</Text>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={[styles.backLink, { color: colors.primary }]}>Go back</Text>
+        <View style={[styles.notFoundIcon, { backgroundColor: colors.muted }]}>
+          <Feather name="user-x" size={32} color={colors.mutedForeground} />
+        </View>
+        <Text style={[styles.notFound, { color: colors.foreground }]}>User not found</Text>
+        <TouchableOpacity
+          style={[styles.backPill, { backgroundColor: colors.primary }]}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backPillText}>Go back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -191,19 +197,20 @@ export default function UserProfileScreen() {
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 60 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
       >
-        {/* Hero */}
         <LinearGradient
-          colors={["#0A1628", "#0F2040"]}
-          style={[styles.hero, { paddingTop: topPad + 8 }]}
+          colors={["#071020", "#0D1C38"]}
+          style={[styles.hero, { paddingTop: topPad + 10 }]}
         >
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Feather name="arrow-left" size={22} color="rgba(255,255,255,0.8)" />
+            <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.8)" />
           </TouchableOpacity>
 
           <View style={styles.heroContent}>
-            <Avatar uri={profile.photoURL} name={profile.displayName} size={88} />
+            <View style={styles.avatarWrap}>
+              <Avatar uri={profile.photoURL} name={profile.displayName} size={90} />
+            </View>
             <Text style={styles.heroName}>{profile.displayName}</Text>
             <Text style={styles.heroUsername}>@{profile.username}</Text>
             {!!profile.profession && (
@@ -216,15 +223,20 @@ export default function UserProfileScreen() {
         </LinearGradient>
 
         <View style={styles.body}>
-          {/* Privacy badge */}
-          <View style={[styles.privacyBadge, { backgroundColor: colors.success + "12", borderColor: colors.success + "25" }]}>
-            <Feather name="shield" size={14} color={colors.success} />
+          <View
+            style={[
+              styles.privacyBadge,
+              { backgroundColor: colors.success + "12", borderColor: colors.success + "25" },
+            ]}
+          >
+            <View style={[styles.privacyIconBox, { backgroundColor: colors.success + "20" }]}>
+              <Feather name="shield" size={13} color={colors.success} />
+            </View>
             <Text style={[styles.privacyText, { color: colors.success }]}>
               Contact info stays private until you both connect
             </Text>
           </View>
 
-          {/* Bio */}
           {!!profile.bio && (
             <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>About</Text>
@@ -232,13 +244,12 @@ export default function UserProfileScreen() {
             </View>
           )}
 
-          {/* Tags */}
           {profile.tags?.length > 0 && (
             <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>Interests</Text>
               <View style={styles.tagsRow}>
                 {profile.tags.map((t) => (
-                  <View key={t} style={[styles.tag, { backgroundColor: colors.primary + "12" }]}>
+                  <View key={t} style={[styles.tag, { backgroundColor: colors.primary + "14" }]}>
                     <Text style={[styles.tagText, { color: colors.primary }]}>{t}</Text>
                   </View>
                 ))}
@@ -246,15 +257,24 @@ export default function UserProfileScreen() {
             </View>
           )}
 
-          {/* Country */}
           {!!profile.country && (
-            <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border, flexDirection: "row", alignItems: "center", gap: 10 }]}>
-              <Feather name="map-pin" size={16} color={colors.mutedForeground} />
+            <View
+              style={[
+                styles.infoCard,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 10,
+                },
+              ]}
+            >
+              <Feather name="map-pin" size={15} color={colors.mutedForeground} />
               <Text style={[styles.infoText, { color: colors.foreground }]}>{profile.country}</Text>
             </View>
           )}
 
-          {/* Action */}
           {renderAction()}
         </View>
       </ScrollView>
@@ -264,25 +284,61 @@ export default function UserProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12 },
-  notFound: { fontSize: 16, fontFamily: "Inter_400Regular" },
-  backLink: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 16 },
+  notFoundIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notFound: { fontSize: 17, fontFamily: "Inter_600SemiBold" },
+  backPill: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  backPillText: { color: "#fff", fontSize: 14, fontFamily: "Inter_600SemiBold" },
   hero: {
     paddingHorizontal: 20,
-    paddingBottom: 28,
+    paddingBottom: 30,
   },
-  backBtn: { padding: 4, marginBottom: 16, alignSelf: "flex-start" },
+  backBtn: {
+    padding: 8,
+    marginBottom: 14,
+    alignSelf: "flex-start",
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
   heroContent: { alignItems: "center", gap: 8 },
-  heroName: { fontSize: 22, fontFamily: "Inter_700Bold", color: "#FFFFFF" },
-  heroUsername: { fontSize: 14, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.6)" },
+  avatarWrap: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    marginBottom: 4,
+  },
+  heroName: {
+    fontSize: 23,
+    fontFamily: "Inter_700Bold",
+    color: "#FFFFFF",
+    letterSpacing: -0.3,
+  },
+  heroUsername: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.55)",
+  },
   profPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "rgba(255,255,255,0.1)",
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
   },
   profPillText: { fontSize: 13, fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.8)" },
   body: { padding: 20, gap: 12 },
@@ -290,40 +346,38 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    gap: 8,
+    gap: 10,
+  },
+  privacyIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   privacyText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1 },
-  infoCard: { padding: 16, borderRadius: 14, borderWidth: 1, gap: 8 },
+  infoCard: { padding: 16, borderRadius: 16, borderWidth: 1, gap: 10 },
   infoLabel: {
     fontSize: 11,
     fontFamily: "Inter_600SemiBold",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
   infoText: { fontSize: 15, fontFamily: "Inter_400Regular", lineHeight: 22 },
   tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tag: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
   tagText: { fontSize: 12, fontFamily: "Inter_500Medium" },
   actionArea: { gap: 10, marginTop: 4 },
-  connectedBadge: {
+  statusBadge: {
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     gap: 8,
   },
-  connectedText: { fontSize: 13, fontFamily: "Inter_500Medium" },
-  pendingBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 8,
-  },
-  pendingText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1 },
+  statusText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1 },
   actionNote: { fontSize: 12, fontFamily: "Inter_400Regular", textAlign: "center" },
 });

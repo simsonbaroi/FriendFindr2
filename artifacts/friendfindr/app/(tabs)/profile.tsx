@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Platform,
   StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -24,26 +23,29 @@ interface RowProps {
   value?: string;
   danger?: boolean;
   colors: any;
+  last?: boolean;
 }
 
-function SettingRow({ icon, label, onPress, value, danger, colors }: RowProps) {
+function SettingRow({ icon, label, onPress, value, danger, colors, last }: RowProps) {
   return (
     <TouchableOpacity
-      style={[styles.row, { borderBottomColor: colors.border }]}
+      style={[
+        styles.row,
+        { borderBottomColor: colors.border },
+        last && { borderBottomWidth: 0 },
+      ]}
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View
         style={[
           styles.rowIcon,
-          { backgroundColor: danger ? colors.destructive + "15" : colors.secondary },
+          { backgroundColor: danger ? colors.destructive + "18" : colors.secondary },
         ]}
       >
         <Feather name={icon} size={17} color={danger ? colors.destructive : colors.primary} />
       </View>
-      <Text
-        style={[styles.rowLabel, { color: danger ? colors.destructive : colors.foreground }]}
-      >
+      <Text style={[styles.rowLabel, { color: danger ? colors.destructive : colors.foreground }]}>
         {label}
       </Text>
       {value ? (
@@ -60,8 +62,8 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { profile, logout } = useAuth();
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const botPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const topPad = insets.top;
+  const botPad = insets.bottom;
 
   const handleLogout = () => {
     Alert.alert("Sign out", "Are you sure you want to sign out?", [
@@ -80,28 +82,29 @@ export default function ProfileScreen() {
     >
       <StatusBar barStyle="light-content" />
 
-      {/* Hero gradient */}
       <LinearGradient
-        colors={["#0A1628", "#0F2040"]}
-        style={[styles.heroBg, { paddingTop: topPad + 16 }]}
+        colors={["#071020", "#0D1C38"]}
+        style={[styles.heroBg, { paddingTop: topPad + 18 }]}
       >
         <View style={styles.heroInner}>
-          <Avatar uri={profile.photoURL} name={profile.displayName} size={80} />
+          <View style={styles.avatarWrap}>
+            <Avatar uri={profile.photoURL} name={profile.displayName} size={82} />
+          </View>
           <View style={styles.heroText}>
             <Text style={styles.heroName}>{profile.displayName}</Text>
             <Text style={styles.heroUsername}>@{profile.username}</Text>
             {!!profile.profession && (
               <View style={styles.profPill}>
-                <Feather name="briefcase" size={11} color="rgba(255,255,255,0.7)" />
+                <Feather name="briefcase" size={11} color="rgba(255,255,255,0.65)" />
                 <Text style={styles.profPillText}>{profile.profession}</Text>
               </View>
             )}
           </View>
           <TouchableOpacity
-            style={styles.editBtn}
+            style={[styles.editBtn, { borderColor: "rgba(255,255,255,0.2)" }]}
             onPress={() => router.push("/edit-profile")}
           >
-            <Feather name="edit-2" size={16} color="rgba(255,255,255,0.8)" />
+            <Feather name="edit-2" size={15} color="rgba(255,255,255,0.85)" />
           </TouchableOpacity>
         </View>
 
@@ -121,31 +124,31 @@ export default function ProfileScreen() {
 
         {!!profile.country && (
           <View style={styles.locationRow}>
-            <Feather name="map-pin" size={13} color="rgba(255,255,255,0.5)" />
+            <Feather name="map-pin" size={12} color="rgba(255,255,255,0.45)" />
             <Text style={styles.locationText}>{profile.country}</Text>
           </View>
         )}
       </LinearGradient>
 
-      {/* Privacy badge */}
-      <View style={[styles.badge, { backgroundColor: colors.success + "12", borderColor: colors.success + "28" }]}>
-        <Feather name="shield" size={15} color={colors.success} />
-        <Text style={[styles.badgeText, { color: colors.success }]}>
+      <View style={[styles.privacyBanner, { backgroundColor: colors.success + "14", borderColor: colors.success + "30" }]}>
+        <View style={[styles.privacyIconBox, { backgroundColor: colors.success + "20" }]}>
+          <Feather name="shield" size={14} color={colors.success} />
+        </View>
+        <Text style={[styles.privacyText, { color: colors.success }]}>
           Your email and phone are always private
         </Text>
       </View>
 
-      {/* Settings */}
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Account</Text>
         <SettingRow icon="edit-2" label="Edit Profile" onPress={() => router.push("/edit-profile")} colors={colors} />
         <SettingRow icon="shield" label="Privacy Settings" onPress={() => router.push("/privacy-settings")} colors={colors} />
-        <SettingRow icon="settings" label="Settings" onPress={() => router.push("/settings")} colors={colors} />
+        <SettingRow icon="settings" label="Settings" onPress={() => router.push("/settings")} colors={colors} last />
       </View>
 
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 12 }]}>
         <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Danger zone</Text>
-        <SettingRow icon="log-out" label="Sign Out" onPress={handleLogout} danger colors={colors} />
+        <SettingRow icon="log-out" label="Sign Out" onPress={handleLogout} danger colors={colors} last />
       </View>
     </ScrollView>
   );
@@ -155,53 +158,62 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   heroBg: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
-    gap: 12,
+    paddingBottom: 22,
+    gap: 14,
   },
   heroInner: { flexDirection: "row", alignItems: "flex-start", gap: 14 },
-  heroText: { flex: 1, gap: 3 },
+  avatarWrap: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  heroText: { flex: 1, gap: 4 },
   heroName: {
     fontSize: 20,
     fontFamily: "Inter_700Bold",
     color: "#FFFFFF",
+    letterSpacing: -0.3,
   },
   heroUsername: {
     fontSize: 14,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.55)",
   },
   profPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
-    marginTop: 2,
+    marginTop: 4,
   },
   profPillText: {
     fontSize: 12,
     fontFamily: "Inter_500Medium",
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.65)",
   },
   editBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.25)",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.08)",
   },
   heroBio: {
     fontSize: 14,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.7)",
-    lineHeight: 20,
+    color: "rgba(255,255,255,0.65)",
+    lineHeight: 21,
   },
   tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   tag: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
   },
   tagText: {
     fontSize: 12,
@@ -212,18 +224,26 @@ const styles = StyleSheet.create({
   locationText: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.5)",
+    color: "rgba(255,255,255,0.45)",
   },
-  badge: {
+  privacyBanner: {
     margin: 16,
+    marginBottom: 12,
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 10,
   },
-  badgeText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1 },
+  privacyIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  privacyText: { fontSize: 13, fontFamily: "Inter_500Medium", flex: 1 },
   section: {
     marginHorizontal: 16,
     borderRadius: 16,
@@ -233,10 +253,10 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 11,
     fontFamily: "Inter_600SemiBold",
-    letterSpacing: 0.6,
+    letterSpacing: 0.7,
     textTransform: "uppercase",
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 14,
     paddingBottom: 6,
   },
   row: {
@@ -244,7 +264,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     gap: 12,
   },
   rowIcon: {

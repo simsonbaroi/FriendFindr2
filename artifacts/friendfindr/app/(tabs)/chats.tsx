@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
   RefreshControl,
   StatusBar,
 } from "react-native";
@@ -45,25 +44,22 @@ export default function ChatsScreen() {
   const [chatItems, setChatItems] = useState<ChatItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  // Track which profiles we've already fetched to avoid redundant work
   const fetchedUids = useRef(new Set<string>());
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = insets.top;
 
   useEffect(() => {
     if (!user) return;
     const unsub = subscribeToChats(user.uid, async (chats) => {
-      // Only fetch profiles for users we haven't loaded yet
       const neededUids = chats
         .map((chat) => chat.participants.find((p) => p !== user.uid) ?? "")
         .filter((uid) => uid && !fetchedUids.current.has(uid));
 
       if (neededUids.length > 0) {
         neededUids.forEach((uid) => fetchedUids.current.add(uid));
-        await getUserProfiles(neededUids); // warms the cache
+        await getUserProfiles(neededUids);
       }
 
-      // Now build items from cache (synchronous after warm)
       const items: ChatItem[] = await Promise.all(
         chats.map(async (chat) => {
           const otherUid = chat.participants.find((p) => p !== user.uid) ?? "";
@@ -86,7 +82,7 @@ export default function ChatsScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: topPad + 12, borderBottomColor: colors.border, backgroundColor: colors.background },
+          { paddingTop: topPad + 14, borderBottomColor: colors.border, backgroundColor: colors.background },
         ]}
       >
         <Text style={[styles.title, { color: colors.foreground }]}>Messages</Text>
@@ -100,8 +96,7 @@ export default function ChatsScreen() {
         <FlatList
           data={chatItems}
           keyExtractor={(item) => item.chat.id}
-          contentContainerStyle={[styles.list, { paddingBottom: 120 }]}
-          scrollEnabled={chatItems.length > 0}
+          contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 90 }]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -112,18 +107,18 @@ export default function ChatsScreen() {
           }
           ListEmptyComponent={
             <View style={styles.emptyBox}>
-              <View style={[styles.emptyIcon, { backgroundColor: colors.primary + "15" }]}>
-                <Feather name="message-circle" size={28} color={colors.primary} />
+              <View style={[styles.emptyIcon, { backgroundColor: colors.primary + "18" }]}>
+                <Feather name="message-circle" size={30} color={colors.primary} />
               </View>
               <Text style={[styles.emptyTitle, { color: colors.foreground }]}>No messages yet</Text>
               <Text style={[styles.emptySub, { color: colors.mutedForeground }]}>
-                Once you and another user both accept each other's connection requests, you'll be
-                able to chat here.
+                Once you and another user both accept each other's connection requests, you'll be able to chat here.
               </Text>
               <TouchableOpacity
                 style={[styles.cta, { backgroundColor: colors.primary }]}
                 onPress={() => router.push("/(tabs)/home")}
               >
+                <Feather name="users" size={14} color="#fff" />
                 <Text style={styles.ctaText}>Find people to connect with</Text>
               </TouchableOpacity>
             </View>
@@ -137,6 +132,7 @@ export default function ChatsScreen() {
               }
             />
           )}
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
         />
       )}
     </View>
@@ -152,13 +148,15 @@ const ChatRow = React.memo(function ChatRow({
   colors: any;
   onPress: () => void;
 }) {
+  const hasUnread = false;
+
   return (
     <TouchableOpacity
       style={[styles.chatRow, { backgroundColor: colors.card, borderColor: colors.border }]}
       onPress={onPress}
       activeOpacity={0.75}
     >
-      <Avatar uri={item.otherUser?.photoURL} name={item.otherUser?.displayName ?? "?"} size={54} />
+      <Avatar uri={item.otherUser?.photoURL} name={item.otherUser?.displayName ?? "?"} size={52} />
       <View style={styles.chatInfo}>
         <View style={styles.chatTopRow}>
           <Text style={[styles.chatName, { color: colors.foreground }]} numberOfLines={1}>
@@ -179,17 +177,39 @@ const ChatRow = React.memo(function ChatRow({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1 },
-  title: { fontSize: 22, fontFamily: "Inter_700Bold" },
-  list: { padding: 16, gap: 10 },
+  header: { paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: StyleSheet.hairlineWidth },
+  title: { fontSize: 24, fontFamily: "Inter_700Bold" },
+  list: { padding: 16 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  emptyBox: { alignItems: "center", paddingTop: 60, gap: 12, paddingHorizontal: 24 },
-  emptyIcon: { width: 64, height: 64, borderRadius: 20, alignItems: "center", justifyContent: "center", marginBottom: 4 },
+  emptyBox: { alignItems: "center", paddingTop: 64, gap: 12, paddingHorizontal: 24 },
+  emptyIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_600SemiBold" },
-  emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
-  cta: { marginTop: 8, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12 },
+  emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 21 },
+  cta: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
   ctaText: { color: "#fff", fontSize: 14, fontFamily: "Inter_600SemiBold" },
-  chatRow: { flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 16, borderWidth: 1, gap: 12 },
+  chatRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 12,
+  },
   chatInfo: { flex: 1, gap: 4 },
   chatTopRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   chatName: { fontSize: 15, fontFamily: "Inter_600SemiBold", flex: 1 },

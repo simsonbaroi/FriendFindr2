@@ -26,43 +26,71 @@ export function InputField({
 }: InputFieldProps) {
   const colors = useColors();
   const [showPass, setShowPass] = useState(false);
+  const [focused, setFocused] = useState(false);
+
+  const borderColor = error
+    ? colors.destructive
+    : focused
+    ? colors.primary
+    : colors.border;
 
   return (
     <View style={styles.wrapper}>
       {!!label && (
-        <Text style={[styles.label, { color: colors.mutedForeground }]}>{label}</Text>
+        <Text
+          style={[
+            styles.label,
+            { color: focused ? colors.primary : colors.mutedForeground },
+          ]}
+        >
+          {label}
+        </Text>
       )}
       <View
         style={[
           styles.inputRow,
           {
             backgroundColor: colors.card,
-            borderColor: error ? colors.destructive : colors.border,
+            borderColor,
+            borderWidth: focused || !!error ? 1.5 : 1,
           },
         ]}
       >
         {!!leftIcon && (
-          <Feather name={leftIcon} size={18} color={colors.mutedForeground} style={styles.icon} />
+          <Feather
+            name={leftIcon}
+            size={17}
+            color={focused ? colors.primary : colors.mutedForeground}
+            style={styles.icon}
+          />
         )}
         <TextInput
           style={[styles.input, { color: colors.foreground }]}
           placeholderTextColor={colors.mutedForeground}
           secureTextEntry={isPassword && !showPass}
-          autoCapitalize="none"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           {...props}
         />
         {isPassword && (
-          <TouchableOpacity onPress={() => setShowPass((v) => !v)} style={styles.eyeBtn}>
+          <TouchableOpacity
+            onPress={() => setShowPass((v) => !v)}
+            style={styles.eyeBtn}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Feather
               name={showPass ? "eye-off" : "eye"}
-              size={18}
+              size={17}
               color={colors.mutedForeground}
             />
           </TouchableOpacity>
         )}
       </View>
       {!!error && (
-        <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>
+        <View style={styles.errorRow}>
+          <Feather name="alert-circle" size={12} color={colors.destructive} />
+          <Text style={[styles.error, { color: colors.destructive }]}>{error}</Text>
+        </View>
       )}
     </View>
   );
@@ -75,16 +103,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 12,
-    borderWidth: 1.5,
     paddingHorizontal: 14,
     height: 50,
   },
-  icon: { marginRight: 8 },
+  icon: { marginRight: 10 },
   input: {
     flex: 1,
     fontSize: 15,
     fontFamily: "Inter_400Regular",
+    paddingVertical: 0,
   },
-  eyeBtn: { padding: 4 },
+  eyeBtn: { paddingLeft: 8 },
+  errorRow: { flexDirection: "row", alignItems: "center", gap: 5 },
   error: { fontSize: 12, fontFamily: "Inter_400Regular" },
 });

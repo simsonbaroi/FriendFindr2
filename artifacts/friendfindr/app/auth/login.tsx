@@ -30,8 +30,8 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const botPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const topPad = insets.top;
+  const botPad = insets.bottom;
 
   const validate = () => {
     const e: typeof errors = {};
@@ -66,14 +66,13 @@ export default function LoginScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <StatusBar barStyle={colors.statusBar} />
+      <StatusBar barStyle="light-content" />
 
-      {/* Top gradient hero */}
       <LinearGradient
-        colors={["#0A1628", "#0F2040", colors.background]}
-        style={[styles.heroBg, { paddingTop: topPad + 24 }]}
+        colors={["#071020", "#0D1C38", colors.background]}
+        style={[styles.heroBg, { paddingTop: topPad + 28 }]}
       >
-        <View style={styles.logoRow}>
+        <View style={styles.logoWrap}>
           <View style={styles.logoBox}>
             <Text style={styles.logoLetter}>F</Text>
           </View>
@@ -87,15 +86,17 @@ export default function LoginScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 24 }]}
+          contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 32 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.cardTitle, { color: colors.foreground }]}>Welcome back</Text>
-            <Text style={[styles.cardSub, { color: colors.mutedForeground }]}>
-              Sign in to your account
-            </Text>
+            <View style={styles.cardHeader}>
+              <Text style={[styles.cardTitle, { color: colors.foreground }]}>Welcome back</Text>
+              <Text style={[styles.cardSub, { color: colors.mutedForeground }]}>
+                Sign in to your account
+              </Text>
+            </View>
 
             <View style={styles.fields}>
               <InputField
@@ -105,6 +106,7 @@ export default function LoginScreen() {
                 onChangeText={(t) => { setEmail(t); setErrors((e) => ({ ...e, email: undefined })); }}
                 leftIcon="mail"
                 keyboardType="email-address"
+                autoCapitalize="none"
                 error={errors.email}
               />
               <InputField
@@ -127,7 +129,6 @@ export default function LoginScreen() {
             <PrimaryButton label="Sign In" onPress={handleLogin} loading={loading} />
           </View>
 
-          {/* Privacy note */}
           <View style={styles.privacyRow}>
             <Feather name="shield" size={13} color={colors.mutedForeground} />
             <Text style={[styles.privacyText, { color: colors.mutedForeground }]}>
@@ -139,8 +140,8 @@ export default function LoginScreen() {
             <Text style={[styles.footerText, { color: colors.mutedForeground }]}>
               Don't have an account?
             </Text>
-            <TouchableOpacity onPress={() => router.push("/auth/signup")}>
-              <Text style={[styles.link, { color: colors.primary }]}>  Create one</Text>
+            <TouchableOpacity onPress={() => router.push("/auth/signup")} style={styles.footerLink}>
+              <Text style={[styles.link, { color: colors.primary }]}>Create one</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -153,31 +154,31 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   heroBg: {
     paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingBottom: 36,
     alignItems: "center",
     gap: 6,
   },
-  logoRow: { marginBottom: 4 },
+  logoWrap: { marginBottom: 6 },
   logoBox: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
+    width: 68,
+    height: 68,
+    borderRadius: 20,
     backgroundColor: "#00C4D8",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#00C4D8",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.45,
+    shadowRadius: 18,
     elevation: 10,
   },
   logoLetter: {
-    fontSize: 32,
+    fontSize: 34,
     fontFamily: "Inter_700Bold",
     color: "#FFFFFF",
   },
   heroTitle: {
-    fontSize: 26,
+    fontSize: 27,
     fontFamily: "Inter_700Bold",
     color: "#FFFFFF",
     letterSpacing: -0.5,
@@ -185,24 +186,25 @@ const styles = StyleSheet.create({
   heroSub: {
     fontSize: 14,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.55)",
   },
   scroll: {
     paddingHorizontal: 20,
-    paddingTop: 4,
+    paddingTop: 8,
     gap: 16,
   },
   card: {
     borderRadius: 20,
     borderWidth: 1,
     padding: 24,
-    gap: 20,
+    gap: 22,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
     elevation: 2,
   },
+  cardHeader: { gap: 4 },
   cardTitle: {
     fontSize: 20,
     fontFamily: "Inter_700Bold",
@@ -210,14 +212,24 @@ const styles = StyleSheet.create({
   cardSub: {
     fontSize: 14,
     fontFamily: "Inter_400Regular",
-    marginTop: -12,
   },
   fields: { gap: 14 },
-  forgotRow: { alignSelf: "flex-end" },
+  forgotRow: { alignSelf: "flex-end", paddingVertical: 2 },
   forgot: { fontSize: 13, fontFamily: "Inter_500Medium" },
-  privacyRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
+  privacyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
   privacyText: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4,
+  },
   footerText: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  footerLink: { padding: 2 },
   link: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });

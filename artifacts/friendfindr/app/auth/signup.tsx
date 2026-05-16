@@ -32,8 +32,8 @@ export default function SignupScreen() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const botPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const topPad = insets.top;
+  const botPad = insets.bottom;
 
   const clearError = (field: string) =>
     setErrors((e) => { const n = { ...e }; delete n[field]; return n; });
@@ -43,7 +43,7 @@ export default function SignupScreen() {
     if (!displayName.trim()) e.displayName = "Name is required";
     if (!username.trim()) e.username = "Username is required";
     else if (!/^[a-zA-Z0-9_]{3,20}$/.test(username))
-      e.username = "3-20 chars: letters, numbers, underscores";
+      e.username = "3–20 chars: letters, numbers, underscores";
     if (!email.trim()) e.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Enter a valid email";
     if (!password) e.password = "Password is required";
@@ -74,14 +74,14 @@ export default function SignupScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <StatusBar barStyle={colors.statusBar} />
+      <StatusBar barStyle="light-content" />
 
       <LinearGradient
-        colors={["#0A1628", "#0F2040", colors.background]}
-        style={[styles.heroBg, { paddingTop: topPad + 16 }]}
+        colors={["#071020", "#0D1C38", colors.background]}
+        style={[styles.heroBg, { paddingTop: topPad + 18 }]}
       >
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.7)" />
+          <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.75)" />
         </TouchableOpacity>
         <Text style={styles.heroTitle}>Create account</Text>
         <Text style={styles.heroSub}>Join FriendFindr today</Text>
@@ -92,7 +92,7 @@ export default function SignupScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
-          contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 24 }]}
+          contentContainerStyle={[styles.scroll, { paddingBottom: botPad + 32 }]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -122,6 +122,7 @@ export default function SignupScreen() {
                 onChangeText={(t) => { setEmail(t); clearError("email"); }}
                 leftIcon="mail"
                 keyboardType="email-address"
+                autoCapitalize="none"
                 error={errors.email}
               />
               <InputField
@@ -149,8 +150,8 @@ export default function SignupScreen() {
             <Text style={[styles.footerText, { color: colors.mutedForeground }]}>
               Already have an account?
             </Text>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={[styles.link, { color: colors.primary }]}>  Sign in</Text>
+            <TouchableOpacity onPress={() => router.back()} style={styles.footerLink}>
+              <Text style={[styles.link, { color: colors.primary }]}>Sign in</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -166,9 +167,15 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     gap: 4,
   },
-  backBtn: { marginBottom: 12, padding: 4, alignSelf: "flex-start" },
+  backBtn: {
+    marginBottom: 14,
+    padding: 6,
+    alignSelf: "flex-start",
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.08)",
+  },
   heroTitle: {
-    fontSize: 26,
+    fontSize: 27,
     fontFamily: "Inter_700Bold",
     color: "#FFFFFF",
     letterSpacing: -0.5,
@@ -176,24 +183,35 @@ const styles = StyleSheet.create({
   heroSub: {
     fontSize: 14,
     fontFamily: "Inter_400Regular",
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.55)",
   },
-  scroll: { paddingHorizontal: 20, paddingTop: 4, gap: 16 },
+  scroll: { paddingHorizontal: 20, paddingTop: 8, gap: 16 },
   card: {
     borderRadius: 20,
     borderWidth: 1,
     padding: 24,
-    gap: 20,
+    gap: 22,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowOpacity: 0.07,
+    shadowRadius: 10,
     elevation: 2,
   },
   fields: { gap: 14 },
-  privacyRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
+  privacyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
   privacyText: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center" },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 4,
+  },
   footerText: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  footerLink: { padding: 2 },
   link: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
 });

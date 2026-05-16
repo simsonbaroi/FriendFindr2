@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
-  Platform,
   RefreshControl,
   StatusBar,
 } from "react-native";
@@ -45,7 +44,7 @@ export default function RequestsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = insets.top;
 
   const loadRequests = useCallback(async (quiet = false) => {
     if (!user) return;
@@ -56,7 +55,6 @@ export default function RequestsScreen() {
         getSentRequests(user.uid),
       ]);
 
-      // Batch-fetch all needed profiles in a single parallel round
       const allUids = [
         ...inc.map((r) => r.fromUid),
         ...snt.map((r) => r.toUid),
@@ -75,7 +73,6 @@ export default function RequestsScreen() {
 
   const onRefresh = () => { setRefreshing(true); loadRequests(); };
 
-  // Optimistic local state update — removes item immediately, syncs in background
   const removeFromIncoming = (reqId: string) =>
     setIncoming((prev) => prev.filter((i) => i.request.id !== reqId));
   const removeFromSent = (reqId: string) =>
@@ -124,7 +121,7 @@ export default function RequestsScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: topPad + 12, borderBottomColor: colors.border, backgroundColor: colors.background },
+          { paddingTop: topPad + 14, borderBottomColor: colors.border, backgroundColor: colors.background },
         ]}
       >
         <Text style={[styles.title, { color: colors.foreground }]}>Requests</Text>
@@ -136,22 +133,23 @@ export default function RequestsScreen() {
             return (
               <TouchableOpacity
                 key={t}
-                style={[styles.tabBtn, active && { backgroundColor: colors.card }]}
+                style={[styles.tabBtn, active && { backgroundColor: colors.card, shadowColor: "#000", shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2 }]}
                 onPress={() => setTab(t)}
+                activeOpacity={0.75}
               >
                 <Text
                   style={[
                     styles.tabLabel,
                     {
                       color: active ? colors.primary : colors.mutedForeground,
-                      fontFamily: active ? "Inter_600SemiBold" : "Inter_400Regular",
+                      fontFamily: active ? "Inter_600SemiBold" : "Inter_500Medium",
                     },
                   ]}
                 >
                   {t === "incoming" ? "Incoming" : "Sent"}
                 </Text>
                 {count > 0 && (
-                  <View style={[styles.badge, { backgroundColor: active ? colors.primary : colors.mutedForeground }]}>
+                  <View style={[styles.badge, { backgroundColor: active ? colors.primary : colors.mutedForeground + "90" }]}>
                     <Text style={styles.badgeText}>{count}</Text>
                   </View>
                 )}
@@ -169,8 +167,7 @@ export default function RequestsScreen() {
         <FlatList
           data={items}
           keyExtractor={(item) => item.request.id}
-          contentContainerStyle={[styles.list, { paddingBottom: 120 }]}
-          scrollEnabled={items.length > 0}
+          contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 90 }]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
@@ -193,6 +190,7 @@ export default function RequestsScreen() {
                   style={[styles.searchCta, { backgroundColor: colors.primary }]}
                   onPress={() => router.push("/(tabs)/home")}
                 >
+                  <Feather name="search" size={14} color="#fff" />
                   <Text style={styles.searchCtaText}>Search for people</Text>
                 </TouchableOpacity>
               )}
@@ -208,6 +206,7 @@ export default function RequestsScreen() {
               colors={colors}
             />
           )}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         />
       )}
     </View>
@@ -266,7 +265,7 @@ const RequestCard = React.memo(function RequestCard({
             <Feather name="check" size={18} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.rejectBtn, { backgroundColor: colors.muted }]}
+            style={[styles.rejectBtn, { backgroundColor: colors.destructive + "14", borderColor: colors.destructive + "30", borderWidth: 1 }]}
             onPress={() => onReject(item.request)}
           >
             <Feather name="x" size={18} color={colors.destructive} />
@@ -274,7 +273,7 @@ const RequestCard = React.memo(function RequestCard({
         </View>
       ) : (
         <TouchableOpacity
-          style={[styles.cancelPill, { borderColor: colors.border }]}
+          style={[styles.cancelPill, { borderColor: colors.border, backgroundColor: colors.muted }]}
           onPress={() => onCancel(item.request)}
         >
           <Text style={[styles.cancelText, { color: colors.mutedForeground }]}>Cancel</Text>
@@ -286,8 +285,8 @@ const RequestCard = React.memo(function RequestCard({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1, gap: 14 },
-  title: { fontSize: 22, fontFamily: "Inter_700Bold" },
+  header: { paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: StyleSheet.hairlineWidth, gap: 14 },
+  title: { fontSize: 24, fontFamily: "Inter_700Bold" },
   tabs: { flexDirection: "row", borderRadius: 12, padding: 3 },
   tabBtn: {
     flex: 1,
@@ -305,18 +304,33 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 4,
+    paddingHorizontal: 5,
   },
   badgeText: { fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#fff" },
-  list: { padding: 16, gap: 10 },
+  list: { padding: 16 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   emptyBox: { alignItems: "center", paddingTop: 60, gap: 12, paddingHorizontal: 24 },
-  emptyIcon: { width: 60, height: 60, borderRadius: 18, alignItems: "center", justifyContent: "center", marginBottom: 4 },
+  emptyIcon: { width: 64, height: 64, borderRadius: 20, alignItems: "center", justifyContent: "center", marginBottom: 4 },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_600SemiBold" },
-  emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
-  searchCta: { marginTop: 8, paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12 },
+  emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 21 },
+  searchCta: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
   searchCtaText: { color: "#fff", fontSize: 14, fontFamily: "Inter_600SemiBold" },
-  card: { flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 16, borderWidth: 1, gap: 12 },
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 12,
+  },
   cardLeft: { flexDirection: "row", alignItems: "center", flex: 1, gap: 12 },
   cardInfo: { flex: 1, gap: 2 },
   cardName: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
@@ -324,8 +338,25 @@ const styles = StyleSheet.create({
   profRow: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 2 },
   cardProf: { fontSize: 12, fontFamily: "Inter_400Regular" },
   actions: { flexDirection: "row", gap: 8 },
-  approveBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
-  rejectBtn: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
-  cancelPill: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
+  approveBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rejectBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
   cancelText: { fontSize: 13, fontFamily: "Inter_500Medium" },
 });

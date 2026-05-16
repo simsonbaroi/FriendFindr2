@@ -6,7 +6,7 @@ import {
   Switch,
   ScrollView,
   TouchableOpacity,
-  Platform,
+  StatusBar,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -60,8 +60,8 @@ export default function PrivacySettingsScreen() {
   const [searchVisible, setSearchVisible] = useState(profile?.searchVisible ?? true);
   const [allowRequests, setAllowRequests] = useState(profile?.allowRequests ?? true);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
-  const botPad = Platform.OS === "web" ? 34 : insets.bottom;
+  const topPad = insets.top;
+  const botPad = insets.bottom;
 
   const save = async (field: string, value: boolean) => {
     if (!profile) return;
@@ -74,7 +74,8 @@ export default function PrivacySettingsScreen() {
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: botPad + 40 }}
     >
-      <View style={[styles.header, { paddingTop: topPad + 16, borderBottomColor: colors.border }]}>
+      <StatusBar barStyle={colors.statusBar} />
+      <View style={[styles.header, { paddingTop: topPad + 14, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={colors.foreground} />
         </TouchableOpacity>

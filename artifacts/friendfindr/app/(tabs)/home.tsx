@@ -31,7 +31,7 @@ export default function HomeScreen() {
   const [searched, setSearched] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad = insets.top;
 
   const handleSearch = useCallback(async () => {
     if (!query.trim() || !user) return;
@@ -58,18 +58,21 @@ export default function HomeScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={colors.statusBar} />
 
-      {/* Header */}
       <View
         style={[
           styles.header,
-          { paddingTop: topPad + 12, backgroundColor: colors.background, borderBottomColor: colors.border },
+          {
+            paddingTop: topPad + 14,
+            backgroundColor: colors.background,
+            borderBottomColor: colors.border,
+          },
         ]}
       >
         <View style={styles.titleRow}>
           <View>
             <Text style={[styles.brand, { color: colors.primary }]}>FriendFindr</Text>
             <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
-              {profile?.displayName ? `Hello, ${profile.displayName.split(" ")[0]}` : "Find people"}
+              {profile?.displayName ? `Hello, ${profile.displayName.split(" ")[0]} 👋` : "Find people"}
             </Text>
           </View>
           <TouchableOpacity
@@ -80,7 +83,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Search bar */}
+        {/* Search bar with integrated search button */}
         <View
           style={[
             styles.searchBar,
@@ -103,25 +106,26 @@ export default function HomeScreen() {
             autoCapitalize="none"
           />
           {!!query && (
-            <TouchableOpacity onPress={handleClear} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              <Feather name="x-circle" size={18} color={colors.mutedForeground} />
+            <TouchableOpacity
+              onPress={handleClear}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={styles.clearBtn}
+            >
+              <Feather name="x" size={16} color={colors.mutedForeground} />
+            </TouchableOpacity>
+          )}
+          {!!query.trim() && (
+            <TouchableOpacity
+              style={[styles.searchActionBtn, { backgroundColor: colors.primary }]}
+              onPress={handleSearch}
+              activeOpacity={0.8}
+            >
+              <Feather name="arrow-right" size={16} color="#fff" />
             </TouchableOpacity>
           )}
         </View>
-
-        {!!query.trim() && (
-          <TouchableOpacity
-            style={[styles.searchBtn, { backgroundColor: colors.primary }]}
-            onPress={handleSearch}
-            activeOpacity={0.8}
-          >
-            <Feather name="search" size={16} color="#fff" />
-            <Text style={styles.searchBtnText}>Search</Text>
-          </TouchableOpacity>
-        )}
       </View>
 
-      {/* Results */}
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} size="large" />
@@ -131,8 +135,7 @@ export default function HomeScreen() {
         <FlatList
           data={results}
           keyExtractor={(item) => item.uid}
-          contentContainerStyle={[styles.list, { paddingBottom: 120 }]}
-          scrollEnabled={results.length > 0}
+          contentContainerStyle={[styles.list, { paddingBottom: insets.bottom + 90 }]}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             searched && results.length > 0 ? (
@@ -155,18 +158,16 @@ export default function HomeScreen() {
                 </>
               ) : (
                 <>
-                  <View style={[styles.emptyIcon, { backgroundColor: colors.primary + "15" }]}>
+                  <View style={[styles.emptyIcon, { backgroundColor: colors.primary + "18" }]}>
                     <Feather name="users" size={28} color={colors.primary} />
                   </View>
                   <Text style={[styles.emptyTitle, { color: colors.foreground }]}>
                     Search for people
                   </Text>
                   <Text style={[styles.emptySub, { color: colors.mutedForeground }]}>
-                    Find and reconnect with people by name, username, profession, or shared interests.
-                    Your contact info stays private.
+                    Find and reconnect with people by name, username, profession, or shared interests. Your contact info stays private.
                   </Text>
 
-                  {/* Tips */}
                   <View style={[styles.tipsCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                     <Text style={[styles.tipsTitle, { color: colors.foreground }]}>Search tips</Text>
                     {[
@@ -175,7 +176,9 @@ export default function HomeScreen() {
                       ["tag", "Use a shared interest or tag"],
                     ].map(([icon, tip]) => (
                       <View key={tip} style={styles.tipRow}>
-                        <Feather name={icon as any} size={14} color={colors.primary} />
+                        <View style={[styles.tipIconBox, { backgroundColor: colors.primary + "12" }]}>
+                          <Feather name={icon as any} size={13} color={colors.primary} />
+                        </View>
                         <Text style={[styles.tipText, { color: colors.mutedForeground }]}>{tip}</Text>
                       </View>
                     ))}
@@ -192,6 +195,7 @@ export default function HomeScreen() {
               }
             />
           )}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         />
       )}
     </View>
@@ -203,7 +207,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingBottom: 14,
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     gap: 12,
   },
   titleRow: {
@@ -211,8 +215,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  brand: { fontSize: 20, fontFamily: "Inter_700Bold", letterSpacing: -0.3 },
-  greeting: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 1 },
+  brand: { fontSize: 21, fontFamily: "Inter_700Bold", letterSpacing: -0.3 },
+  greeting: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
   settingsBtn: {
     width: 38,
     height: 38,
@@ -226,27 +230,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 14,
     borderWidth: 1.5,
-    paddingHorizontal: 14,
-    height: 48,
+    paddingLeft: 14,
+    paddingRight: 6,
+    height: 50,
     gap: 10,
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
     fontFamily: "Inter_400Regular",
+    paddingVertical: 0,
   },
-  searchBtn: {
-    flexDirection: "row",
+  clearBtn: {
+    width: 28,
+    height: 28,
     alignItems: "center",
     justifyContent: "center",
-    height: 44,
-    borderRadius: 12,
-    gap: 6,
   },
-  searchBtnText: {
-    color: "#fff",
-    fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+  searchActionBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
   list: { padding: 16 },
   resultCount: {
@@ -258,24 +264,31 @@ const styles = StyleSheet.create({
   loadingText: { fontSize: 14, fontFamily: "Inter_400Regular" },
   emptyBox: { alignItems: "center", paddingTop: 48, gap: 12, paddingHorizontal: 16 },
   emptyIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+    width: 68,
+    height: 68,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 4,
   },
   emptyTitle: { fontSize: 18, fontFamily: "Inter_600SemiBold", textAlign: "center" },
-  emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 20 },
+  emptySub: { fontSize: 14, fontFamily: "Inter_400Regular", textAlign: "center", lineHeight: 21 },
   tipsCard: {
     width: "100%",
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     padding: 16,
-    gap: 10,
+    gap: 12,
     marginTop: 8,
   },
   tipsTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold", marginBottom: 2 },
   tipRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  tipIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   tipText: { fontSize: 13, fontFamily: "Inter_400Regular" },
 });
