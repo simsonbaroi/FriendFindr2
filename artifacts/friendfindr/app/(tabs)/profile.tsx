@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
   StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -60,7 +61,7 @@ function SettingRow({ icon, label, onPress, value, danger, colors, last }: RowPr
 export default function ProfileScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { profile, logout } = useAuth();
+  const { profile, loading, logout } = useAuth();
 
   const topPad = insets.top;
   const botPad = insets.bottom;
@@ -72,7 +73,27 @@ export default function ProfileScreen() {
     ]);
   };
 
-  if (!profile) return null;
+  if (loading || !profile) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }]}>
+        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+        <View style={[styles.notSignedInIcon, { backgroundColor: colors.primary + "15" }]}>
+          <Feather name="user" size={36} color={colors.primary} />
+        </View>
+        <Text style={[styles.notSignedInTitle, { color: colors.foreground }]}>Not signed in</Text>
+        <Text style={[styles.notSignedInSub, { color: colors.mutedForeground }]}>
+          Sign in to view and manage your profile
+        </Text>
+        <TouchableOpacity
+          style={[styles.signInBtn, { backgroundColor: colors.primary }]}
+          onPress={() => router.replace("/auth/login")}
+        >
+          <Feather name="log-in" size={16} color="#fff" />
+          <Text style={styles.signInBtnText}>Sign In</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -277,4 +298,30 @@ const styles = StyleSheet.create({
   },
   rowLabel: { flex: 1, fontSize: 15, fontFamily: "Inter_500Medium" },
   rowValue: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  notSignedInIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  notSignedInTitle: { fontSize: 20, fontFamily: "Inter_700Bold", marginBottom: 6 },
+  notSignedInSub: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    textAlign: "center",
+    paddingHorizontal: 40,
+    lineHeight: 21,
+    marginBottom: 20,
+  },
+  signInBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    borderRadius: 14,
+  },
+  signInBtnText: { color: "#fff", fontSize: 15, fontFamily: "Inter_600SemiBold" },
 });

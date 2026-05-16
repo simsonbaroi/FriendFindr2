@@ -107,14 +107,16 @@ export default function SettingsScreen() {
         onPress={() => router.push("/(tabs)/profile")}
         activeOpacity={0.75}
       >
-        <Avatar uri={profile?.photoURL} name={profile?.displayName ?? "?"} size={52} />
+        <Avatar uri={profile?.photoURL} name={profile?.displayName ?? ""} size={52} />
         <View style={styles.profileInfo}>
           <Text style={[styles.profileName, { color: colors.foreground }]}>
-            {profile?.displayName}
+            {profile?.displayName ?? "Not signed in"}
           </Text>
-          <Text style={[styles.profileUsername, { color: colors.mutedForeground }]}>
-            @{profile?.username}
-          </Text>
+          {!!profile?.username && (
+            <Text style={[styles.profileUsername, { color: colors.mutedForeground }]}>
+              @{profile.username}
+            </Text>
+          )}
         </View>
         <Feather name="chevron-right" size={18} color={colors.border} />
       </TouchableOpacity>
