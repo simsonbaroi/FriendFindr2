@@ -54,15 +54,15 @@ export default function RequestsScreen() {
         getIncomingRequests(user.uid),
         getSentRequests(user.uid),
       ]);
-
       const allUids = [
         ...inc.map((r) => r.fromUid),
         ...snt.map((r) => r.toUid),
       ];
       const profiles = await getUserProfiles(allUids);
-
       setIncoming(inc.map((r) => ({ request: r, user: profiles.get(r.fromUid) ?? null })));
       setSent(snt.map((r) => ({ request: r, user: profiles.get(r.toUid) ?? null })));
+    } catch {
+      // Firestore permission errors or network issues — show empty state
     } finally {
       setLoading(false);
       setRefreshing(false);

@@ -54,7 +54,8 @@ export async function getUserChats(uid: string): Promise<Chat[]> {
 
 export function subscribeToMessages(
   chatId: string,
-  callback: (messages: Message[]) => void
+  callback: (messages: Message[]) => void,
+  onError?: (err: Error) => void
 ): Unsubscribe {
   const q = query(
     collection(db, "messages"),
@@ -62,10 +63,21 @@ export function subscribeToMessages(
     orderBy("createdAt", "desc"),
     limit(100)
   );
-  return onSnapshot(q, (snap) => {
-    const msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Message));
-    callback(msgs);
-  });
+  return onSnapshot(
+    q,
+    (snap) => {
+      const msgs = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Message));
+      callback(msgs);
+    },
+    (err) => {
+      if (err.code === "permission-denied") {
+        onError?.(err);
+      } else {
+        console.warn("[chatService] subscribeToMessages error:", err.message);
+        onError?.(err);
+      }
+    }
+  );
 }
 
 export async function sendMessage(chatId: string, senderId: string, text: string) {
@@ -86,18 +98,33 @@ export async function sendMessage(chatId: string, senderId: string, text: string
   });
 }
 
-export function subscribeToChats(uid: string, callback: (chats: Chat[]) => void): Unsubscribe {
+export function subscribeToChats(
+  uid: string,
+  callback: (chats: Chat[]) => void,
+  onError?: (err: Error) => void
+): Unsubscribe {
   const q = query(
     collection(db, "chats"),
     where("participants", "array-contains", uid)
   );
-  return onSnapshot(q, (snap) => {
-    const chats = snap.docs.map((d) => d.data() as Chat);
-    chats.sort((a, b) => {
-      const ta = a.lastMessageAt?.toMillis?.() ?? 0;
-      const tb = b.lastMessageAt?.toMillis?.() ?? 0;
-      return tb - ta;
-    });
-    callback(chats);
-  });
+  return onSnapshot(
+    q,
+    (snap) => {
+      const chats = snap.docs.map((d) => d.data() as Chat);
+      chats.sort((a, b) => {
+        const ta = a.lastMessageAt?.toMillis?.() ?? 0;
+        const tb = b.lastMessageAt?.toMillis?.() ?? 0;
+        return tb - ta;
+      });
+      callback(chats);
+    },
+    (err) => {
+      if (err.code === "permission-denied") {
+        onError?.(err);
+      } else {
+        console.warn("[chatService] subscribeToChats error:", err.message);
+        onError?.(err);
+      }
+    }
+  );
 }

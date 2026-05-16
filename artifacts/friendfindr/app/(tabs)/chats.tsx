@@ -44,34 +44,43 @@ export default function ChatsScreen() {
   const [chatItems, setChatItems] = useState<ChatItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [permError, setPermError] = useState(false);
   const fetchedUids = useRef(new Set<string>());
 
   const topPad = insets.top;
 
   useEffect(() => {
     if (!user) return;
-    const unsub = subscribeToChats(user.uid, async (chats) => {
-      const neededUids = chats
-        .map((chat) => chat.participants.find((p) => p !== user.uid) ?? "")
-        .filter((uid) => uid && !fetchedUids.current.has(uid));
+    const unsub = subscribeToChats(
+      user.uid,
+      async (chats) => {
+        const neededUids = chats
+          .map((chat) => chat.participants.find((p) => p !== user.uid) ?? "")
+          .filter((uid) => uid && !fetchedUids.current.has(uid));
 
-      if (neededUids.length > 0) {
-        neededUids.forEach((uid) => fetchedUids.current.add(uid));
-        await getUserProfiles(neededUids);
+        if (neededUids.length > 0) {
+          neededUids.forEach((uid) => fetchedUids.current.add(uid));
+          await getUserProfiles(neededUids);
+        }
+
+        const items: ChatItem[] = await Promise.all(
+          chats.map(async (chat) => {
+            const otherUid = chat.participants.find((p) => p !== user.uid) ?? "";
+            const profiles = otherUid ? await getUserProfiles([otherUid]) : new Map();
+            return { chat, otherUser: profiles.get(otherUid) ?? null };
+          })
+        );
+
+        setChatItems(items);
+        setLoading(false);
+        setRefreshing(false);
+      },
+      () => {
+        setPermError(true);
+        setLoading(false);
+        setRefreshing(false);
       }
-
-      const items: ChatItem[] = await Promise.all(
-        chats.map(async (chat) => {
-          const otherUid = chat.participants.find((p) => p !== user.uid) ?? "";
-          const profiles = otherUid ? await getUserProfiles([otherUid]) : new Map();
-          return { chat, otherUser: profiles.get(otherUid) ?? null };
-        })
-      );
-
-      setChatItems(items);
-      setLoading(false);
-      setRefreshing(false);
-    });
+    );
     return unsub;
   }, [user]);
 
@@ -91,6 +100,16 @@ export default function ChatsScreen() {
       {loading ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary} />
+        </View>
+      ) : permError ? (
+        <View style={styles.emptyBox}>
+          <View style={[styles.emptyIcon, { backgroundColor: colors.warning + "18" }]}>
+            <Feather name="alert-circle" size={30} color={colors.warning} />
+          </View>
+          <Text style={[styles.emptyTitle, { color: colors.foreground }]}>Firestore rules needed</Text>
+          <Text style={[styles.emptySub, { color: colors.mutedForeground }]}>
+            Your Firebase project's Firestore security rules are blocking access. Go to your Firebase console → Firestore → Rules and paste the rules from the setup guide.
+          </Text>
         </View>
       ) : (
         <FlatList

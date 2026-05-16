@@ -53,10 +53,16 @@ export default function ChatScreen() {
     if (otherUid) {
       getUserProfile(otherUid).then(setOtherUser);
     }
-    const unsub = subscribeToMessages(chatId, (msgs) => {
-      setMessages(msgs);
-      setLoading(false);
-    });
+    const unsub = subscribeToMessages(
+      chatId,
+      (msgs) => {
+        setMessages(msgs);
+        setLoading(false);
+      },
+      () => {
+        setLoading(false);
+      }
+    );
     return unsub;
   }, [chatId, user]);
 
