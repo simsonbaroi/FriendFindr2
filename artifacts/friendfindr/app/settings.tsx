@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
-  Linking,
   StatusBar,
 } from "react-native";
 import { router } from "expo-router";
@@ -26,11 +25,7 @@ export default function SettingsScreen() {
   const topPad = insets.top;
   const botPad = insets.bottom;
 
-  const openSupport = () => {
-    Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=FriendFindr Support`).catch(() =>
-      Alert.alert("Contact Support", `Email us at:\n${SUPPORT_EMAIL}`)
-    );
-  };
+  const openSupport = () => router.push("/contact-support");
 
   const showPrivacyPolicy = () => router.push("/privacy-policy");
 

@@ -49,6 +49,7 @@ function RootLayoutNav() {
       <Stack.Screen name="privacy-settings" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="settings" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="privacy-policy" options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="contact-support" options={{ animation: "slide_from_bottom" }} />
     </Stack>
   );
 }
