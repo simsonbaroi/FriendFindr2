@@ -32,16 +32,7 @@ export default function SettingsScreen() {
     );
   };
 
-  const showPrivacyPolicy = () => {
-    Alert.alert(
-      "Privacy Policy",
-      "Your contact information (email, phone) is never shared with other users.\n\nWe use Firebase to store your data securely. You can request deletion of your account at any time.\n\nFor the full privacy policy or any concerns, contact us at:\n\nfriendfindr.support@gmail.com",
-      [
-        { text: "Contact Support", onPress: openSupport },
-        { text: "OK", style: "cancel" },
-      ]
-    );
-  };
+  const showPrivacyPolicy = () => router.push("/privacy-policy");
 
   const Row = ({
     icon,
