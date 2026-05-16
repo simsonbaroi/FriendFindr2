@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Platform,
   KeyboardAvoidingView,
-  Alert,
   StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -31,6 +30,7 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [authError, setAuthError] = useState("");
 
   const topPad = insets.top;
   const botPad = insets.bottom;
@@ -53,6 +53,7 @@ export default function SignupScreen() {
   };
 
   const handleSignup = async () => {
+    setAuthError("");
     if (!validate()) return;
     setLoading(true);
     try {
@@ -60,13 +61,15 @@ export default function SignupScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      const msg =
+      setAuthError(
         err.code === "auth/email-already-in-use"
           ? "An account with this email already exists."
           : err.code === "auth/weak-password"
-          ? "Password is too weak."
-          : err.message ?? "Signup failed. Please try again.";
-      Alert.alert("Create account failed", msg);
+          ? "Password is too weak. Use at least 6 characters."
+          : err.code === "auth/network-request-failed"
+          ? "Network error. Check your connection."
+          : err.message ?? "Account creation failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -141,6 +144,13 @@ export default function SignupScreen() {
               />
             </View>
 
+            {!!authError && (
+              <View style={[styles.errorBanner, { backgroundColor: "#E53E3E18", borderColor: "#E53E3E30" }]}>
+                <Feather name="alert-circle" size={15} color="#E53E3E" />
+                <Text style={styles.errorText}>{authError}</Text>
+              </View>
+            )}
+
             <PrimaryButton label="Create Account" onPress={handleSignup} loading={loading} />
           </View>
 
@@ -203,6 +213,21 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   fields: { gap: 14 },
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "#E53E3E",
+    lineHeight: 18,
+  },
   privacyRow: {
     flexDirection: "row",
     alignItems: "center",

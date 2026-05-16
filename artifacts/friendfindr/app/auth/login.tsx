@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Platform,
   KeyboardAvoidingView,
-  Alert,
   StatusBar,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -29,6 +28,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [authError, setAuthError] = useState("");
 
   const topPad = insets.top;
   const botPad = insets.bottom;
@@ -43,6 +43,7 @@ export default function LoginScreen() {
   };
 
   const handleLogin = async () => {
+    setAuthError("");
     if (!validate()) return;
     setLoading(true);
     try {
@@ -50,15 +51,17 @@ export default function LoginScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (err: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      const msg =
+      setAuthError(
         err.code === "auth/invalid-credential" || err.code === "auth/wrong-password"
           ? "Incorrect email or password."
           : err.code === "auth/user-not-found"
           ? "No account found with this email."
           : err.code === "auth/too-many-requests"
           ? "Too many attempts. Try again later."
-          : err.message ?? "Login failed. Please try again.";
-      Alert.alert("Sign in failed", msg);
+          : err.code === "auth/network-request-failed"
+          ? "Network error. Check your connection."
+          : err.message ?? "Sign in failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -127,6 +130,13 @@ export default function LoginScreen() {
                 <Text style={[styles.forgot, { color: colors.primary }]}>Forgot password?</Text>
               </TouchableOpacity>
             </View>
+
+            {!!authError && (
+              <View style={[styles.errorBanner, { backgroundColor: "#E53E3E18", borderColor: "#E53E3E30" }]}>
+                <Feather name="alert-circle" size={15} color="#E53E3E" />
+                <Text style={styles.errorText}>{authError}</Text>
+              </View>
+            )}
 
             <PrimaryButton label="Sign In" onPress={handleLogin} loading={loading} />
           </View>
@@ -219,6 +229,21 @@ const styles = StyleSheet.create({
   fields: { gap: 14 },
   forgotRow: { alignSelf: "flex-end", paddingVertical: 2 },
   forgot: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: "#E53E3E",
+    lineHeight: 18,
+  },
   privacyRow: {
     flexDirection: "row",
     alignItems: "center",
