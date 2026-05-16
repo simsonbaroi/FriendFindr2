@@ -49,13 +49,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (uid: string) => {
+  const fetchProfile = async (uid: string, fallbackUser?: User) => {
     try {
       const snap = await getDoc(doc(db, "users", uid));
       if (snap.exists()) {
         setProfile(snap.data() as UserProfile);
+      } else if (fallbackUser) {
+        // Profile doc missing — create a minimal one from Firebase Auth data
+        const newProfile: UserProfile = {
+          uid: fallbackUser.uid,
+          displayName: fallbackUser.displayName || fallbackUser.email?.split("@")[0] || "User",
+          username: (fallbackUser.email?.split("@")[0] || "user_" + fallbackUser.uid.slice(0, 5)).toLowerCase(),
+          email: fallbackUser.email || "",
+          photoURL: fallbackUser.photoURL || "",
+          bio: "",
+          country: "",
+          profession: "",
+          tags: [],
+          searchVisible: true,
+          allowRequests: true,
+          createdAt: serverTimestamp(),
+        };
+        await setDoc(doc(db, "users", uid), newProfile);
+        setProfile(newProfile);
       }
     } catch (e) {
+      console.error("fetchProfile error:", e);
     }
   };
 
@@ -63,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       if (firebaseUser) {
-        await fetchProfile(firebaseUser.uid);
+        await fetchProfile(firebaseUser.uid, firebaseUser);
       } else {
         setProfile(null);
       }
