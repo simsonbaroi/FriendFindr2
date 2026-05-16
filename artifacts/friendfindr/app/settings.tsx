@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Linking,
   StatusBar,
 } from "react-native";
 import { router } from "expo-router";
@@ -15,6 +16,8 @@ import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar } from "@/components/Avatar";
 
+const SUPPORT_EMAIL = "friendfindr.support@gmail.com";
+
 export default function SettingsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -22,6 +25,23 @@ export default function SettingsScreen() {
 
   const topPad = insets.top;
   const botPad = insets.bottom;
+
+  const openSupport = () => {
+    Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=FriendFindr Support`).catch(() =>
+      Alert.alert("Contact Support", `Email us at:\n${SUPPORT_EMAIL}`)
+    );
+  };
+
+  const showPrivacyPolicy = () => {
+    Alert.alert(
+      "Privacy Policy",
+      "Your contact information (email, phone) is never shared with other users.\n\nWe use Firebase to store your data securely. You can request deletion of your account at any time.\n\nFor the full privacy policy or any concerns, contact us at:\n\nfriendfindr.support@gmail.com",
+      [
+        { text: "Contact Support", onPress: openSupport },
+        { text: "OK", style: "cancel" },
+      ]
+    );
+  };
 
   const Row = ({
     icon,
@@ -39,6 +59,7 @@ export default function SettingsScreen() {
     <TouchableOpacity
       style={[styles.row, { borderBottomColor: colors.border }]}
       onPress={onPress}
+      activeOpacity={0.7}
     >
       <View
         style={[
@@ -48,7 +69,7 @@ export default function SettingsScreen() {
       >
         <Feather
           name={icon}
-          size={18}
+          size={17}
           color={danger ? colors.destructive : colors.primary}
         />
       </View>
@@ -56,9 +77,11 @@ export default function SettingsScreen() {
         {label}
       </Text>
       {value ? (
-        <Text style={[styles.rowValue, { color: colors.mutedForeground }]}>{value}</Text>
+        <Text style={[styles.rowValue, { color: colors.mutedForeground }]} numberOfLines={1}>
+          {value}
+        </Text>
       ) : (
-        <Feather name="chevron-right" size={16} color={colors.mutedForeground} />
+        <Feather name="chevron-right" size={16} color={colors.border} />
       )}
     </TouchableOpacity>
   );
@@ -67,9 +90,16 @@ export default function SettingsScreen() {
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={{ paddingBottom: botPad + 40 }}
+      showsVerticalScrollIndicator={false}
     >
       <StatusBar barStyle={colors.statusBar} />
-      <View style={[styles.header, { paddingTop: topPad + 14, borderBottomColor: colors.border }]}>
+
+      <View
+        style={[
+          styles.header,
+          { paddingTop: topPad + 14, borderBottomColor: colors.border },
+        ]}
+      >
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Feather name="arrow-left" size={22} color={colors.foreground} />
         </TouchableOpacity>
@@ -77,19 +107,21 @@ export default function SettingsScreen() {
         <View style={{ width: 38 }} />
       </View>
 
-      {/* Profile summary */}
       <TouchableOpacity
         style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}
         onPress={() => router.push("/(tabs)/profile")}
+        activeOpacity={0.75}
       >
         <Avatar uri={profile?.photoURL} name={profile?.displayName ?? "?"} size={52} />
         <View style={styles.profileInfo}>
-          <Text style={[styles.profileName, { color: colors.foreground }]}>{profile?.displayName}</Text>
+          <Text style={[styles.profileName, { color: colors.foreground }]}>
+            {profile?.displayName}
+          </Text>
           <Text style={[styles.profileUsername, { color: colors.mutedForeground }]}>
             @{profile?.username}
           </Text>
         </View>
-        <Feather name="chevron-right" size={18} color={colors.mutedForeground} />
+        <Feather name="chevron-right" size={18} color={colors.border} />
       </TouchableOpacity>
 
       <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
@@ -99,17 +131,58 @@ export default function SettingsScreen() {
         <Row icon="mail" label="Email" value={profile?.email ?? ""} onPress={() => {}} />
       </View>
 
-      <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 12 }]}>
-        <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>About</Text>
-        <Row icon="info" label="FriendFindr" value="MVP v1.0" onPress={() => {}} />
+      <View
+        style={[
+          styles.section,
+          { backgroundColor: colors.card, borderColor: colors.border, marginTop: 12 },
+        ]}
+      >
+        <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>Support & Legal</Text>
+        <Row
+          icon="help-circle"
+          label="Contact Support"
+          onPress={openSupport}
+        />
         <Row
           icon="lock"
           label="Privacy Policy"
-          onPress={() => Alert.alert("Privacy", "Your data is protected. Contact info is never shared.")}
+          onPress={showPrivacyPolicy}
+        />
+        <Row
+          icon="info"
+          label="Version"
+          value="v1.0.0"
+          onPress={() => {}}
         />
       </View>
 
-      <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border, marginTop: 12 }]}>
+      <View
+        style={[
+          styles.supportCard,
+          { backgroundColor: colors.card, borderColor: colors.border },
+        ]}
+      >
+        <View style={[styles.supportIconBox, { backgroundColor: colors.primary + "14" }]}>
+          <Feather name="mail" size={15} color={colors.primary} />
+        </View>
+        <View style={styles.supportText}>
+          <Text style={[styles.supportLabel, { color: colors.foreground }]}>Support Email</Text>
+          <Text style={[styles.supportEmail, { color: colors.primary }]}>{SUPPORT_EMAIL}</Text>
+        </View>
+        <TouchableOpacity
+          onPress={openSupport}
+          style={[styles.supportBtn, { backgroundColor: colors.primary }]}
+        >
+          <Text style={styles.supportBtnText}>Email</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View
+        style={[
+          styles.section,
+          { backgroundColor: colors.card, borderColor: colors.border, marginTop: 4 },
+        ]}
+      >
         <Row
           icon="log-out"
           label="Sign Out"
@@ -133,15 +206,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
+    paddingBottom: 14,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  backBtn: { padding: 4 },
+  backBtn: { padding: 6, borderRadius: 10 },
   title: { fontSize: 18, fontFamily: "Inter_700Bold" },
   profileCard: {
     flexDirection: "row",
     alignItems: "center",
     margin: 16,
+    marginBottom: 12,
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
@@ -152,28 +226,63 @@ const styles = StyleSheet.create({
   profileUsername: { fontSize: 13, fontFamily: "Inter_400Regular" },
   section: {
     marginHorizontal: 16,
+    marginBottom: 0,
     borderRadius: 16,
     borderWidth: 1,
     overflow: "hidden",
     paddingTop: 4,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Inter_600SemiBold",
-    letterSpacing: 0.5,
+    letterSpacing: 0.7,
     textTransform: "uppercase",
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingTop: 12,
+    paddingBottom: 4,
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     gap: 12,
   },
-  rowIcon: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  rowIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   rowLabel: { flex: 1, fontSize: 15, fontFamily: "Inter_500Medium" },
-  rowValue: { fontSize: 14, fontFamily: "Inter_400Regular" },
+  rowValue: { fontSize: 13, fontFamily: "Inter_400Regular", maxWidth: 180 },
+  supportCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 12,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    gap: 12,
+  },
+  supportIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  supportText: { flex: 1, gap: 2 },
+  supportLabel: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  supportEmail: { fontSize: 13, fontFamily: "Inter_400Regular" },
+  supportBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  supportBtnText: { color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" },
 });
